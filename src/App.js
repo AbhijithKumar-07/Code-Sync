@@ -1,5 +1,5 @@
 import './App.css';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, HashRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Home from './pages/Home';
 import EditorPage from './pages/EditorPage';
@@ -19,7 +19,7 @@ function App() {
                     }}
                 ></Toaster>
             </div>
-            <BrowserRouter>
+            <HashRouter>
                 <Routes>
                     <Route path="/" element={<Home />}></Route>
                     <Route
@@ -27,7 +27,7 @@ function App() {
                         element={<EditorPage />}
                     ></Route>
                 </Routes>
-            </BrowserRouter>
+            </HashRouter>
         </>
     );
 }
