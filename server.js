@@ -3,10 +3,14 @@ const app = express();
 const http = require('http');
 const path = require('path');
 const { Server } = require('socket.io');
+const { YSocketIO } = require('y-socket.io/dist/server');
 const ACTIONS = require('./src/Actions');
 
 const server = http.createServer(app);
 const io = new Server(server);
+const ysocketio = new YSocketIO(io);
+
+ysocketio.initialize();
 
 app.use(express.static('build'));
 app.use((req, res, next) => {
@@ -42,12 +46,10 @@ io.on('connection', (socket) => {
         });
     });
 
-    socket.on(ACTIONS.CODE_CHANGE, ({ roomId, code }) => {
-        socket.in(roomId).emit(ACTIONS.CODE_CHANGE, { code });
-    });
-
-    socket.on(ACTIONS.SYNC_CODE, ({ socketId, code }) => {
-        io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
+    socket.on(ACTIONS.LATENCY_PING, (acknowledge) => {
+        if (typeof acknowledge === 'function') {
+            acknowledge();
+        }
     });
 
     socket.on('disconnecting', () => {
@@ -59,7 +61,6 @@ io.on('connection', (socket) => {
             });
         });
         delete userSocketMap[socket.id];
-        socket.leave();
     });
 });
 
