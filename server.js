@@ -46,10 +46,8 @@ io.on('connection', (socket) => {
         });
     });
 
-    socket.on(ACTIONS.LATENCY_PING, (acknowledge) => {
-        if (typeof acknowledge === 'function') {
-            acknowledge();
-        }
+    socket.on(ACTIONS.LATENCY_PING, (sentAt) => {
+        socket.emit(ACTIONS.LATENCY_PONG, sentAt);
     });
 
     socket.on('disconnecting', () => {

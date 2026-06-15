@@ -19,16 +19,18 @@ const EditorPage = () => {
     const [clients, setClients] = useState([]);
     const [connectionStatus, setConnectionStatus] = useState('connecting');
     const [averageLatency, setAverageLatency] = useState(null);
+    const latencySamplesRef = useRef([]);
+    const warmupCountRef = useRef(0);
     const username = location.state?.username;
 
     const latencyQuality =
         averageLatency === null
             ? 'Measuring'
-            : averageLatency < 50
+            : averageLatency < 300
             ? 'Excellent'
-            : averageLatency < 100
+            : averageLatency < 500
             ? 'Good'
-            : averageLatency < 200
+            : averageLatency < 800
             ? 'Fair'
             : 'Slow';
 
@@ -49,17 +51,50 @@ const EditorPage = () => {
 
     useEffect(() => {
         let latencyInterval;
-        const latencySamples = [];
+
+        const handleErrors = (e) => {
+            console.log('socket error', e);
+            toast.error('Connection interrupted. Reconnecting...');
+        };
+
+        const handlePongCheck = (sentAt) => {
+            if (typeof sentAt !== 'number') {
+                return;
+            }
+
+            const rtt = performance.now() - sentAt;
+            if (warmupCountRef.current < 3) {
+                warmupCountRef.current += 1;
+                return;
+            }
+
+            const samples = latencySamplesRef.current;
+            samples.push(rtt);
+            if (samples.length > 10) {
+                samples.shift();
+            }
+
+            const average =
+                samples.reduce((sum, sample) => sum + sample, 0) /
+                samples.length;
+            setAverageLatency(average);
+        };
+
+        const measureLatency = () => {
+            if (!socketRef.current || !socketRef.current.connected) {
+                return;
+            }
+
+            socketRef.current.emit(ACTIONS.LATENCY_PING, performance.now());
+        };
 
         const init = async () => {
-            socketRef.current = await initSocket();
-            socketRef.current.on('connect_error', (err) => handleErrors(err));
-            socketRef.current.on('connect_failed', (err) => handleErrors(err));
+            latencySamplesRef.current = [];
+            warmupCountRef.current = 0;
 
-            function handleErrors(e) {
-                console.log('socket error', e);
-                toast.error('Connection interrupted. Reconnecting...');
-            }
+            socketRef.current = await initSocket();
+            socketRef.current.on('connect_error', handleErrors);
+            socketRef.current.on('connect_failed', handleErrors);
 
             const joinRoom = () => {
                 socketRef.current.emit(ACTIONS.JOIN, {
@@ -69,56 +104,42 @@ const EditorPage = () => {
             };
 
             socketRef.current.on('connect', joinRoom);
+            socketRef.current.on(ACTIONS.LATENCY_PONG, handlePongCheck);
+
             if (socketRef.current.connected) {
                 joinRoom();
             }
 
-            socketRef.current.on(
-                ACTIONS.JOINED,
-                ({ username }) => {
-                    if (username !== location.state?.username) {
-                        toast.success(`${username} Joined The Room.`);
-                        console.log(`${username} Joined`);
-                    }
+            socketRef.current.on(ACTIONS.JOINED, ({ username }) => {
+                if (username !== location.state?.username) {
+                    toast.success(`${username} Joined The Room.`);
+                    console.log(`${username} Joined`);
                 }
-            );
+            });
 
-            socketRef.current.on(
-                ACTIONS.DISCONNECTED,
-                ({ username }) => {
-                    toast.success(`${username} Left The Room.`);
-                }
-            );
-
-            const measureLatency = () => {
-                const startedAt = performance.now();
-                socketRef.current.emit(ACTIONS.LATENCY_PING, () => {
-                    const latency = performance.now() - startedAt;
-                    latencySamples.push(latency);
-                    if (latencySamples.length > 20) {
-                        latencySamples.shift();
-                    }
-                    const total = latencySamples.reduce(
-                        (sum, sample) => sum + sample,
-                        0
-                    );
-                    setAverageLatency(total / latencySamples.length);
-                });
-            };
+            socketRef.current.on(ACTIONS.DISCONNECTED, ({ username }) => {
+                toast.success(`${username} Left The Room.`);
+            });
 
             measureLatency();
             latencyInterval = setInterval(measureLatency, 3000);
         };
+
         init();
+
         return () => {
             clearInterval(latencyInterval);
             if (socketRef.current) {
-                socketRef.current.disconnect();
+                socketRef.current.off('connect_error', handleErrors);
+                socketRef.current.off('connect_failed', handleErrors);
+                socketRef.current.off('connect');
+                socketRef.current.off(ACTIONS.PONG_CHECK, handlePongCheck);
                 socketRef.current.off(ACTIONS.JOINED);
                 socketRef.current.off(ACTIONS.DISCONNECTED);
+                socketRef.current.disconnect();
             }
         };
-    }, [location.state?.username, reactNavigator, roomId, username]);
+    }, [location.state?.username, roomId, username]);
 
     async function copyRoomId() {
         try {
