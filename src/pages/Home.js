@@ -9,9 +9,7 @@ const Home = () => {
     const [roomId, setRoomId] = useState(() => {
         return sessionStorage.getItem('codesync_draft_room_id') || '';
     });
-    const [username, setUsername] = useState(() => {
-        return sessionStorage.getItem('codesync_draft_username') || localStorage.getItem('codesync_last_username') || '';
-    });
+    const [username, setUsername] = useState('');
 
     const [showRoomId, setShowRoomId] = useState(false);
 
@@ -22,8 +20,6 @@ const Home = () => {
 
     const handleUsernameChange = (val) => {
         setUsername(val);
-        sessionStorage.setItem('codesync_draft_username', val);
-        localStorage.setItem('codesync_last_username', val);
     };
 
     const createNewRoom = (e) => {

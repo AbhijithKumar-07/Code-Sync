@@ -1004,13 +1004,214 @@ body {
     width: 6px;
     height: 6px;
     border-radius: 50%;
+}/* ==========================================================================
+   MODERN LIVE NETWORK SPEED CARD
+   ========================================================================== */
+.networkSpeedCard {
+    background: linear-gradient(180deg, rgba(21, 26, 42, 0.85) 0%, rgba(13, 16, 28, 0.95) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 13px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(14px);
+    transition: all 0.25s ease;
 }
 
+.networkSpeedCard:hover {
+    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 16px rgba(16, 185, 129, 0.08);
+}
 
+.speedCardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 
+.speedTitleWithDot {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
 
+.livePulseDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+    animation: speedDotPulse 2s infinite ease-in-out;
+}
 
+@keyframes speedDotPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.45;
+        transform: scale(0.85);
+    }
+}
 
+.speedCardHeading {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.speedQualityTag {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 2px 8px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    line-height: 1.3;
+}
+
+.speedQualityTag.ultrafast {
+    background: rgba(16, 185, 129, 0.14);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.speedQualityTag.fast {
+    background: rgba(34, 197, 94, 0.14);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.speedQualityTag.good {
+    background: rgba(132, 204, 22, 0.14);
+    color: #a3e635;
+    border: 1px solid rgba(132, 204, 22, 0.3);
+}
+
+.speedQualityTag.normal {
+    background: rgba(245, 158, 11, 0.14);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.speedQualityTag.measuring {
+    background: rgba(148, 163, 184, 0.14);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.speedMetricRow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 1px 0;
+}
+
+.speedMetricValGroup {
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+}
+
+.speedNumber {
+    font-size: 22px;
+    font-weight: 800;
+    font-family: var(--font-code);
+    color: #ffffff;
+    line-height: 1;
+}
+
+.speedUnit {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #10b981;
+    font-family: var(--font-code);
+}
+
+.speedMetricSubtitle {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.speedMeterTrack {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 1px;
+}
+
+.speedMeterBar {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease;
+}
+
+.speedMeterBar.ultrafast {
+    width: 100%;
+    background: linear-gradient(90deg, #10b981, #34d399);
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.5);
+}
+
+.speedMeterBar.fast {
+    width: 80%;
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+}
+
+.speedMeterBar.good {
+    width: 60%;
+    background: linear-gradient(90deg, #84cc16, #a3e635);
+}
+
+.speedMeterBar.normal {
+    width: 40%;
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.speedMeterBar.measuring {
+    width: 50%;
+    background: #64748b;
+    animation: meterPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes meterPulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 0.9; }
+}
+
+.speedCardFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 7px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.speedFooterStatus {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-muted);
+    font-size: 10.5px;
+    font-weight: 600;
+}
+
+.speedFooterStatus svg {
+    color: #10b981;
+    flex-shrink: 0;
+}
+
+.speedFooterNode {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-subtle);
+}
 
 /* ==========================================================================
    MODERN LIVE CHAT UI

@@ -162,6 +162,25 @@ const EditorPage = () => {
     });
     const [idCopied, setIdCopied] = useState(false);
 
+    // Live Server Latency / Speed State
+    const [networkLatency, setNetworkLatency] = useState(() => {
+        const saved = sessionStorage.getItem('codesync_latency');
+        return saved ? parseFloat(saved) : null;
+    });
+    const latencySamplesRef = useRef([]);
+    const warmupCountRef = useRef(0);
+
+    const speedCategory =
+        networkLatency === null
+            ? 'Measuring...'
+            : networkLatency < 75
+            ? 'Ultra-Fast'
+            : networkLatency < 160
+            ? 'Fast'
+            : networkLatency < 280
+            ? 'Good'
+            : 'Normal';
+
     const editorInstanceRef = useRef(null);
     const ytextInstanceRef = useRef(null);
     const onRunCodeRef = useRef(null);
@@ -481,12 +500,41 @@ const EditorPage = () => {
 
     // Socket Connection & Lifecycle
     useEffect(() => {
+        let pingTimer;
+
         const handleErrors = (e) => {
             console.log('socket error', e);
             toast.error('Connection interrupted. Reconnecting...');
         };
 
+        const handlePongCheck = (sentAt) => {
+            if (typeof sentAt !== 'number') return;
+            const rtt = Math.max(1, Math.round(performance.now() - sentAt));
+            if (warmupCountRef.current < 1) {
+                warmupCountRef.current += 1;
+                setNetworkLatency(rtt);
+                return;
+            }
+
+            const samples = latencySamplesRef.current;
+            samples.push(rtt);
+            if (samples.length > 8) samples.shift();
+
+            const avg = samples.reduce((a, b) => a + b, 0) / samples.length;
+            setNetworkLatency(avg);
+            sessionStorage.setItem('codesync_latency', avg.toFixed(0));
+        };
+
+        const pingServer = () => {
+            if (socketRef.current && socketRef.current.connected) {
+                socketRef.current.emit(ACTIONS.LATENCY_PING, performance.now());
+            }
+        };
+
         const init = async () => {
+            latencySamplesRef.current = [];
+            warmupCountRef.current = 0;
+
             const socket = await initSocket();
             socketRef.current = socket;
 
@@ -501,6 +549,7 @@ const EditorPage = () => {
             };
 
             socket.on('connect', joinRoom);
+            socket.on(ACTIONS.LATENCY_PONG, handlePongCheck);
 
             if (socket.connected) {
                 joinRoom();
@@ -565,15 +614,20 @@ const EditorPage = () => {
             });
 
             socket.on(ACTIONS.LANGUAGE_CHANGE, () => {});
+
+            pingServer();
+            pingTimer = setInterval(pingServer, 4000);
         };
 
         init();
 
         return () => {
+            clearInterval(pingTimer);
             if (socketRef.current) {
                 socketRef.current.off('connect_error', handleErrors);
                 socketRef.current.off('connect_failed', handleErrors);
                 socketRef.current.off('connect');
+                socketRef.current.off(ACTIONS.LATENCY_PONG, handlePongCheck);
                 socketRef.current.off(ACTIONS.JOINED);
                 socketRef.current.off(ACTIONS.DISCONNECTED);
                 socketRef.current.off(ACTIONS.SYNC_CHAT_HISTORY);
@@ -716,6 +770,43 @@ const EditorPage = () => {
                                         isTyping={client.isTyping}
                                     />
                                 ))}
+                            </div>
+
+                            {/* Ultra-Modern Live Speed & Responsiveness Card */}
+                            <div className="networkSpeedCard">
+                                <div className="speedCardHeader">
+                                    <div className="speedTitleWithDot">
+                                        <span className="livePulseDot" />
+                                        <span className="speedCardHeading">NETWORK SPEED</span>
+                                    </div>
+                                    <span className={`speedQualityTag ${speedCategory.toLowerCase().replace(/[^a-z]/g, '')}`}>
+                                        {speedCategory}
+                                    </span>
+                                </div>
+
+                                <div className="speedMetricRow">
+                                    <div className="speedMetricValGroup">
+                                        <span className="speedNumber">
+                                            {networkLatency === null ? '--' : Math.round(networkLatency)}
+                                        </span>
+                                        <span className="speedUnit">ms</span>
+                                    </div>
+                                    <span className="speedMetricSubtitle">Server Latency</span>
+                                </div>
+
+                                <div className="speedMeterTrack">
+                                    <div className={`speedMeterBar ${speedCategory.toLowerCase().replace(/[^a-z]/g, '')}`} />
+                                </div>
+
+                                <div className="speedCardFooter">
+                                    <span className="speedFooterStatus">
+                                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                        Live Collaborative Sync
+                                    </span>
+                                    <span className="speedFooterNode">Cloud Node</span>
+                                </div>
                             </div>
                         </div>
                     ) : (
