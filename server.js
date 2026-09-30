@@ -579,22 +579,14 @@ app.post('/api/execute', async (req, res) => {
             return res.json({ run: jsResult, compiler: jsResult.compiler, executionTime: jsResult.executionTime });
         }
 
-        // Step 2: Instant Local Python Execution if available (10-30ms)
-        if (allowLocal && (langKey === 'python' || langKey === 'py')) {
-            const pyResult = await executeLocalPython(code, stdin);
-            if (pyResult) {
-                return res.json({ run: pyResult, compiler: pyResult.compiler, executionTime: pyResult.executionTime });
-            }
-        }
-
-        // Step 3: Fast Cloud Sandboxing via Judge0 CE (~150-300ms)
-        const judge0Result = await executeViaJudge0(langKey, code, stdin);
-        if (judge0Result) {
-            return res.json({ run: judge0Result, compiler: judge0Result.compiler, executionTime: judge0Result.executionTime });
-        }
-
-        // Step 4: Fast Local Sandboxed Native Compilers (if installed)
+        // Step 2: Native Docker Container Compilers & Runtimes (15-60ms zero-latency)
         if (allowLocal) {
+            if (langKey === 'python' || langKey === 'py') {
+                const pyResult = await executeLocalPython(code, stdin);
+                if (pyResult) {
+                    return res.json({ run: pyResult, compiler: pyResult.compiler, executionTime: pyResult.executionTime });
+                }
+            }
             if (langKey === 'cpp' || langKey === 'c++') {
                 const cppResult = await executeLocalCpp(code, stdin);
                 if (cppResult) {
@@ -639,7 +631,13 @@ app.post('/api/execute', async (req, res) => {
             }
         }
 
-        // Step 5: Check Piston Integration
+        // Step 3: Fast Cloud Sandboxing via Judge0 CE (~150-300ms)
+        const judge0Result = await executeViaJudge0(langKey, code, stdin);
+        if (judge0Result) {
+            return res.json({ run: judge0Result, compiler: judge0Result.compiler, executionTime: judge0Result.executionTime });
+        }
+
+        // Step 4: Check Piston Integration (if configured)
         const pistonResult = await executeViaPiston(langKey, code, stdin);
         if (pistonResult) {
             return res.json({ run: pistonResult, compiler: pistonResult.compiler, executionTime: pistonResult.executionTime });
