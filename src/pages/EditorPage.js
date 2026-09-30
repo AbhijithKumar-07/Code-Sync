@@ -808,25 +808,33 @@ const EditorPage = () => {
                     )}
                 </div>
 
-                {/* Sidebar Bottom Room Actions - Clean Copy Room ID Pill */}
-                <div className="sidebarFooterActions">
+                {/* Sidebar Bottom Room Actions - Horizontal Copy ID and Leave Row */}
+                <div className="sidebarFooterActions horizontalRow">
                     <button className="copyRoomIdPillBtn" onClick={copyRoomId}>
                         {idCopied ? (
                             <>
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4aed88" strokeWidth="2.5">
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#4aed88" strokeWidth="2.5">
                                     <polyline points="20 6 9 17 4 12" />
                                 </svg>
-                                <span>Room ID Copied!</span>
+                                <span>Copied!</span>
                             </>
                         ) : (
                             <>
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2">
                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                                 </svg>
-                                <span>Copy Room ID</span>
+                                <span>Copy ID</span>
                             </>
                         )}
+                    </button>
+                    <button className="sidebarLeaveBtn" onClick={handleLeaveRoomRequest}>
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        <span>Leave</span>
                     </button>
                 </div>
             </div>

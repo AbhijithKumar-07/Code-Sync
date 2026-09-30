@@ -380,34 +380,62 @@ footer a {
 }
 
 .sidebarFooterActions {
-    padding: 10px 14px;
+    padding: 10px 12px;
     border-top: 1px solid var(--border-subtle);
     background: rgba(13, 17, 23, 0.6);
     display: flex;
     align-items: center;
 }
 
+.sidebarFooterActions.horizontalRow {
+    gap: 8px;
+}
+
 .copyRoomIdPillBtn {
-    width: 100%;
+    flex: 1;
     background: #191c2b;
     border: 1px solid var(--border-subtle);
     border-radius: 6px;
     color: var(--text-main);
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 600;
-    padding: 7px 12px;
+    padding: 6px 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
+    gap: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    white-space: nowrap;
 }
 
 .copyRoomIdPillBtn:hover {
     background: #23283e;
     border-color: var(--primary-accent);
+    color: #ffffff;
+}
+
+.sidebarLeaveBtn {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 6px;
+    color: #f87171;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.sidebarLeaveBtn:hover {
+    background: rgba(239, 68, 68, 0.22);
+    border-color: #ef4444;
     color: #ffffff;
 }
 
@@ -434,19 +462,21 @@ footer a {
 .sectionTitleGroup {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     cursor: pointer;
 }
 
-.sectionChevron {
-    font-size: 10px;
-    color: var(--text-subtle);
-    transition: transform 0.15s ease;
-    display: inline-block;
-    width: 10px;
+.sectionChevronSvg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+    width: 14px;
+    height: 14px;
 }
 
-.sectionChevron.collapsed {
+.sectionChevronSvg.collapsed {
     transform: rotate(-90deg);
 }
 
@@ -613,32 +643,100 @@ footer a {
     font-family: var(--font-code);
 }
 
-.explorerEmptyNotice {
+.explorerEmptyStateCard {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 32px 16px;
+    margin: 18px 6px;
+    padding: 22px 14px;
     text-align: center;
-    gap: 10px;
-    color: var(--text-subtle);
-    font-size: 12px;
+    background: rgba(26, 30, 47, 0.45);
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
 }
 
-.createFirstFileBtn {
+.emptyStateIconBox {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: rgba(74, 237, 136, 0.08);
+    border: 1px solid rgba(74, 237, 136, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-accent);
+    margin-bottom: 10px;
+}
+
+.emptyStateTitle {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 3px 0;
+}
+
+.emptyStateSubtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin: 0 0 14px 0;
+    line-height: 1.4;
+    max-width: 190px;
+}
+
+.emptyStateActionRow {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+}
+
+.emptyCreateFileBtn {
+    flex: 1;
     background: rgba(74, 237, 136, 0.12);
     border: 1px solid rgba(74, 237, 136, 0.3);
     color: var(--primary-accent);
     border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 12px;
+    padding: 6px 8px;
+    font-size: 11px;
     font-weight: 700;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
-.createFirstFileBtn:hover {
-    background: rgba(74, 237, 136, 0.22);
+.emptyCreateFileBtn:hover {
+    background: rgba(74, 237, 136, 0.24);
+    border-color: var(--primary-accent);
+    color: #ffffff;
+}
+
+.emptyCreateFolderBtn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.emptyCreateFolderBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+    border-color: var(--border-strong);
 }
 
 .collaboratorsView {
