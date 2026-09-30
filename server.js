@@ -330,7 +330,7 @@ function executeLocalCpp(code, stdin = '') {
             return resolve(null);
         }
 
-        exec(`g++ -O2 "${srcFile}" -o "${exeFile}"`, { timeout: 6000 }, (compileErr, compStdout, compStderr) => {
+        exec(`g++ -O0 "${srcFile}" -o "${exeFile}"`, { timeout: 4000 }, (compileErr, compStdout, compStderr) => {
             try { fs.unlinkSync(srcFile); } catch {}
             if (compileErr) {
                 const msg = (compileErr.message || '').toLowerCase();
@@ -348,7 +348,7 @@ function executeLocalCpp(code, stdin = '') {
                 });
             }
 
-            const runProc = execFile(exeFile, { timeout: 4000 }, (runErr, runStdout, runStderr) => {
+            const runProc = execFile(exeFile, { timeout: 3500 }, (runErr, runStdout, runStderr) => {
                 try { fs.unlinkSync(exeFile); } catch {}
                 const elapsed = Math.max(Date.now() - startTime, 1);
                 resolve({
@@ -379,7 +379,7 @@ function executeLocalC(code, stdin = '') {
         const exeFile = path.join(tempDir, `code_${timestamp}.exe`);
         try { fs.writeFileSync(srcFile, code); } catch { return resolve(null); }
 
-        exec(`gcc -O2 "${srcFile}" -o "${exeFile}"`, { timeout: 6000 }, (compileErr, compStdout, compStderr) => {
+        exec(`gcc -O0 "${srcFile}" -o "${exeFile}"`, { timeout: 4000 }, (compileErr, compStdout, compStderr) => {
             try { fs.unlinkSync(srcFile); } catch {}
             if (compileErr) {
                 const msg = (compileErr.message || '').toLowerCase();
@@ -397,7 +397,7 @@ function executeLocalC(code, stdin = '') {
                 });
             }
 
-            const runProc = execFile(exeFile, { timeout: 4000 }, (runErr, runStdout, runStderr) => {
+            const runProc = execFile(exeFile, { timeout: 3500 }, (runErr, runStdout, runStderr) => {
                 try { fs.unlinkSync(exeFile); } catch {}
                 const elapsed = Math.max(Date.now() - startTime, 1);
                 resolve({
@@ -430,12 +430,13 @@ function executeLocalJava(code, stdin = '') {
             const srcFile = path.join(javaDir, `${className}.java`);
             fs.writeFileSync(srcFile, code);
 
-            exec(`javac "${srcFile}"`, { timeout: 6000, cwd: javaDir }, (compileErr, compStdout, compStderr) => {
+            // Fast JVM compilation with bounded heap and Tiered JIT optimization
+            exec(`javac -J-Xms16m -J-Xmx64m -J-XX:+UseSerialGC -J-XX:TieredStopAtLevel=1 "${srcFile}"`, { timeout: 3500, cwd: javaDir }, (compileErr, compStdout, compStderr) => {
                 if (compileErr) {
                     try { fs.rmSync(javaDir, { recursive: true, force: true }); } catch {}
                     const msg = (compileErr.message || '').toLowerCase();
-                    if (compileErr.code === 127 || msg.includes('not found') || msg.includes('not recognized')) {
-                        return resolve(null);
+                    if (compileErr.code === 127 || msg.includes('not found') || msg.includes('not recognized') || compileErr.killed) {
+                        return resolve(null); // Fallback to cloud sandbox if javac binary missing or timed out
                     }
                     const elapsed = Math.max(Date.now() - startTime, 1);
                     return resolve({
@@ -448,7 +449,7 @@ function executeLocalJava(code, stdin = '') {
                     });
                 }
 
-                const runProc = exec(`java -cp "${javaDir}" ${className}`, { timeout: 5000, cwd: javaDir }, (runErr, runStdout, runStderr) => {
+                const runProc = exec(`java -Xms16m -Xmx64m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -cp "${javaDir}" ${className}`, { timeout: 3500, cwd: javaDir }, (runErr, runStdout, runStderr) => {
                     try { fs.rmSync(javaDir, { recursive: true, force: true }); } catch {}
                     const elapsed = Math.max(Date.now() - startTime, 1);
                     resolve({
@@ -478,11 +479,11 @@ function executeLocalGo(code, stdin = '') {
         const srcFile = path.join(tempDir, `main_${timestamp}.go`);
         try { fs.writeFileSync(srcFile, code); } catch { return resolve(null); }
 
-        const runProc = exec(`go run "${srcFile}"`, { timeout: 6000 }, (runErr, runStdout, runStderr) => {
+        const runProc = exec(`go run "${srcFile}"`, { timeout: 4000, env: { ...process.env, GOCACHE: '/tmp/go-cache' } }, (runErr, runStdout, runStderr) => {
             try { fs.unlinkSync(srcFile); } catch {}
             if (runErr) {
                 const msg = (runErr.message || '').toLowerCase();
-                if (runErr.code === 127 || msg.includes('not found') || msg.includes('not recognized')) {
+                if (runErr.code === 127 || msg.includes('not found') || msg.includes('not recognized') || runErr.killed) {
                     return resolve(null);
                 }
             }
@@ -511,11 +512,11 @@ function executeLocalRust(code, stdin = '') {
         const exeFile = path.join(tempDir, `code_${timestamp}.exe`);
         try { fs.writeFileSync(srcFile, code); } catch { return resolve(null); }
 
-        exec(`rustc "${srcFile}" -o "${exeFile}"`, { timeout: 6000 }, (compileErr, compStdout, compStderr) => {
+        exec(`rustc -C opt-level=0 "${srcFile}" -o "${exeFile}"`, { timeout: 4000 }, (compileErr, compStdout, compStderr) => {
             try { fs.unlinkSync(srcFile); } catch {}
             if (compileErr) {
                 const msg = (compileErr.message || '').toLowerCase();
-                if (compileErr.code === 127 || msg.includes('not found') || msg.includes('not recognized')) {
+                if (compileErr.code === 127 || msg.includes('not found') || msg.includes('not recognized') || compileErr.killed) {
                     return resolve(null);
                 }
                 const elapsed = Math.max(Date.now() - startTime, 1);
@@ -529,7 +530,7 @@ function executeLocalRust(code, stdin = '') {
                 });
             }
 
-            const runProc = execFile(exeFile, { timeout: 4000 }, (runErr, runStdout, runStderr) => {
+            const runProc = execFile(exeFile, { timeout: 3500 }, (runErr, runStdout, runStderr) => {
                 try { fs.unlinkSync(exeFile); } catch {}
                 const elapsed = Math.max(Date.now() - startTime, 1);
                 resolve({
