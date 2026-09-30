@@ -232,31 +232,42 @@ footer a {
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
+    padding: 0;
     width: 48px;
+    height: 100vh;
     user-select: none;
     z-index: 20;
+    box-sizing: border-box;
 }
 
-.activityBarTop,
-.activityBarBottom {
+.activityBarTop {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
     width: 100%;
+    padding-top: 10px;
 }
 
 .activityBarBottom {
-    padding-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 54px;
+    min-height: 54px;
+    border-top: 1px solid var(--border-subtle);
+    background: rgba(13, 17, 23, 0.4);
+    box-sizing: border-box;
+    padding: 0;
 }
 
 .activityBtn {
     background: transparent;
     border: none;
     color: var(--text-muted);
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -380,63 +391,73 @@ footer a {
 }
 
 .sidebarFooterActions {
-    padding: 10px 12px;
+    height: 54px;
+    min-height: 54px;
+    padding: 0 12px;
     border-top: 1px solid var(--border-subtle);
-    background: rgba(13, 17, 23, 0.6);
+    background: rgba(13, 17, 23, 0.4);
     display: flex;
     align-items: center;
-}
-
-.sidebarFooterActions.horizontalRow {
-    gap: 8px;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .copyRoomIdPillBtn {
-    flex: 1;
-    background: #191c2b;
-    border: 1px solid var(--border-subtle);
-    border-radius: 6px;
-    color: var(--text-main);
-    font-size: 11.5px;
-    font-weight: 600;
-    padding: 6px 10px;
+    width: 100%;
+    height: 36px;
+    background: linear-gradient(180deg, #1b2033 0%, #131625 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #f1f5f9;
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 0 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
     white-space: nowrap;
+    outline: none;
+    user-select: none;
+}
+
+.copyRoomIdPillBtn svg {
+    color: var(--primary-accent);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
 }
 
 .copyRoomIdPillBtn:hover {
-    background: #23283e;
-    border-color: var(--primary-accent);
+    background: linear-gradient(180deg, #242c46 0%, #191e32 100%);
+    border-color: rgba(74, 237, 136, 0.45);
     color: #ffffff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45), 0 0 14px rgba(74, 237, 136, 0.18);
+    transform: translateY(-1px);
 }
 
-.sidebarLeaveBtn {
-    background: rgba(239, 68, 68, 0.08);
-    border: 1px solid rgba(239, 68, 68, 0.25);
-    border-radius: 6px;
-    color: #f87171;
-    font-size: 11.5px;
-    font-weight: 600;
-    padding: 6px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
+.copyRoomIdPillBtn:hover svg {
+    transform: scale(1.1);
 }
 
-.sidebarLeaveBtn:hover {
-    background: rgba(239, 68, 68, 0.22);
-    border-color: #ef4444;
-    color: #ffffff;
+.copyRoomIdPillBtn:active {
+    transform: translateY(0);
+}
+
+.copyRoomIdPillBtn.copied {
+    background: rgba(74, 237, 136, 0.14);
+    border-color: #4aed88;
+    color: #4aed88;
+    box-shadow: 0 0 16px rgba(74, 237, 136, 0.25);
+}
+
+.copyRoomIdPillBtn.copied svg {
+    color: #4aed88;
 }
 
 /* ==========================================================================
@@ -902,64 +923,7 @@ footer a {
     font-weight: 600;
 }
 
-/* Sidebar Actions */
-.sidebarFooterActions {
-    padding: 12px 14px;
-    border-top: 1px solid var(--border-subtle);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
 
-.sidebarActionBtn {
-    border: none;
-    border-radius: 8px;
-    padding: 9px 12px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    transition: all 0.2s ease;
-}
-
-.sidebarFooterActions.compactRow {
-    padding: 12px 14px;
-    border-top: 1px solid var(--border-subtle);
-    display: flex;
-    gap: 8px;
-}
-
-.compactActionBtn {
-    flex: 1;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-muted);
-    border-radius: 8px;
-    padding: 8px 10px;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    transition: all 0.2s ease;
-}
-
-.compactActionBtn:hover {
-    background: var(--bg-surface-hover);
-    color: var(--text-main);
-    border-color: var(--border-strong);
-}
-
-.compactActionBtn:first-child:hover {
-    color: var(--primary-accent);
-    border-color: rgba(74, 237, 136, 0.4);
-    background: rgba(74, 237, 136, 0.06);
-}
 
 
 

@@ -725,7 +725,6 @@ const EditorPage = () => {
                     <button
                         className="activityBtn leave"
                         onClick={handleLeaveRoomRequest}
-                        title="Leave Room"
                     >
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -809,23 +808,23 @@ const EditorPage = () => {
                     )}
                 </div>
 
-                {/* Sidebar Bottom Room Actions - Copy ID */}
-                <div className="sidebarFooterActions horizontalRow">
-                    <button className="copyRoomIdPillBtn" onClick={copyRoomId}>
+                {/* Sidebar Bottom Room Actions - Copy Room ID */}
+                <div className="sidebarFooterActions">
+                    <button className={`copyRoomIdPillBtn ${idCopied ? 'copied' : ''}`} onClick={copyRoomId}>
                         {idCopied ? (
                             <>
-                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#4aed88" strokeWidth="2.5">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <polyline points="20 6 9 17 4 12" />
                                 </svg>
-                                <span>Copied!</span>
+                                <span>Room ID Copied!</span>
                             </>
                         ) : (
                             <>
-                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1" />
                                 </svg>
-                                <span>Copy ID</span>
+                                <span>Copy Room ID</span>
                             </>
                         )}
                     </button>
