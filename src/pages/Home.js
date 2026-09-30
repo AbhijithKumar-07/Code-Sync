@@ -65,20 +65,21 @@ const Home = () => {
                     </button>
                     <span className="createInfo">
                         If You Don't Have An Invite Then Create &nbsp;
-                        <a
+                        <button
+                            type="button"
                             onClick={createNewRoom}
-                            href=""
                             className="createNewBtn"
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                         >
                             New Room
-                        </a>
+                        </button>
                     </span>
                 </div>
             </div>
             <footer>
                 <h4>
                     Built With 🩷 By &nbsp;
-                    <a href="https://github.com/AbhijithKumar-07" target='_blank' >Abhijith Kumar</a>
+                    <a href="https://github.com/AbhijithKumar-07" target="_blank" rel="noreferrer">Abhijith Kumar</a>
                 </h4>
             </footer>
         </div>
