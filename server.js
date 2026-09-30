@@ -102,9 +102,7 @@ const WANDBOX_COMPILER_MAP = {
 // 1. Judge0 Execution Handler (Production Sandboxing)
 // --------------------------------------------------------
 async function executeViaJudge0(langKey, code, stdin = '') {
-    const judge0Url = process.env.JUDGE0_API_URL;
-    if (!judge0Url) return null;
-
+    const judge0Url = process.env.JUDGE0_API_URL || 'https://ce.judge0.com';
     const apiKey = process.env.JUDGE0_API_KEY;
     const apiHost = process.env.JUDGE0_API_HOST || 'judge0-ce.p.rapidapi.com';
     const langId = JUDGE0_LANGUAGE_MAP[langKey];
@@ -123,7 +121,7 @@ async function executeViaJudge0(langKey, code, stdin = '') {
         }
 
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 6000);
+        const timeout = setTimeout(() => controller.abort(), 5000);
 
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -152,7 +150,7 @@ async function executeViaJudge0(langKey, code, stdin = '') {
             stderr,
             code: isSuccess ? 0 : 1,
             output: stdout || stderr || '(No output produced)',
-            compiler: `Judge0 Sandbox (${data.status?.description || 'Executed'})`,
+            compiler: `Sandbox Engine (${data.status?.description || 'Executed'})`,
             executionTime: Math.round(parseFloat(data.time || 0) * 1000) || elapsed,
         };
     } catch (err) {
@@ -173,7 +171,7 @@ async function executeViaPiston(langKey, code, stdin = '') {
     const startTime = Date.now();
     try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
+        const timeout = setTimeout(() => controller.abort(), 4000);
 
         const response = await fetch(pistonUrl, {
             method: 'POST',
@@ -575,30 +573,28 @@ app.post('/api/execute', async (req, res) => {
     const allowLocal = process.env.ENABLE_LOCAL_EXECUTION !== 'false';
 
     try {
-        // Step 1: Check Judge0 Integration (Production Sandboxing)
+        // Step 1: Instant Local JS Execution (0-2ms)
+        if (langKey === 'javascript' || langKey === 'js') {
+            const jsResult = executeLocalJS(code);
+            return res.json({ run: jsResult, compiler: jsResult.compiler, executionTime: jsResult.executionTime });
+        }
+
+        // Step 2: Instant Local Python Execution if available (10-30ms)
+        if (allowLocal && (langKey === 'python' || langKey === 'py')) {
+            const pyResult = await executeLocalPython(code, stdin);
+            if (pyResult) {
+                return res.json({ run: pyResult, compiler: pyResult.compiler, executionTime: pyResult.executionTime });
+            }
+        }
+
+        // Step 3: Fast Cloud Sandboxing via Judge0 CE (~150-300ms)
         const judge0Result = await executeViaJudge0(langKey, code, stdin);
         if (judge0Result) {
             return res.json({ run: judge0Result, compiler: judge0Result.compiler, executionTime: judge0Result.executionTime });
         }
 
-        // Step 2: Check Piston Integration
-        const pistonResult = await executeViaPiston(langKey, code, stdin);
-        if (pistonResult) {
-            return res.json({ run: pistonResult, compiler: pistonResult.compiler, executionTime: pistonResult.executionTime });
-        }
-
-        // Step 3: Fast Local Sandboxed Execution (if enabled/available)
+        // Step 4: Fast Local Sandboxed Native Compilers (if installed)
         if (allowLocal) {
-            if (langKey === 'javascript' || langKey === 'js') {
-                const jsResult = executeLocalJS(code);
-                return res.json({ run: jsResult, compiler: jsResult.compiler, executionTime: jsResult.executionTime });
-            }
-            if (langKey === 'python' || langKey === 'py') {
-                const pyResult = await executeLocalPython(code, stdin);
-                if (pyResult) {
-                    return res.json({ run: pyResult, compiler: pyResult.compiler, executionTime: pyResult.executionTime });
-                }
-            }
             if (langKey === 'cpp' || langKey === 'c++') {
                 const cppResult = await executeLocalCpp(code, stdin);
                 if (cppResult) {
@@ -641,6 +637,12 @@ app.post('/api/execute', async (req, res) => {
                     return res.json({ run: rubyResult, compiler: rubyResult.compiler, executionTime: rubyResult.executionTime });
                 }
             }
+        }
+
+        // Step 5: Check Piston Integration
+        const pistonResult = await executeViaPiston(langKey, code, stdin);
+        if (pistonResult) {
+            return res.json({ run: pistonResult, compiler: pistonResult.compiler, executionTime: pistonResult.executionTime });
         }
 
         // Step 4: Universal Cloud Compiler Fallback (Wandbox)

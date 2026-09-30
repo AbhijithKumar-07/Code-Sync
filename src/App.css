@@ -808,6 +808,27 @@ body {
     padding-left: 10px;
 }
 
+.explorerInlineRenameForm {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    margin-right: 4px;
+}
+
+.explorerRenameInput {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--primary-accent);
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 12px;
+    padding: 1px 5px;
+    outline: none;
+    font-family: var(--font-code);
+    box-shadow: 0 0 0 2px rgba(74, 237, 136, 0.2);
+}
+
 .inlineIcon {
     font-size: 12px;
 }

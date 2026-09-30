@@ -183,6 +183,7 @@ const EditorPage = () => {
 
     const editorInstanceRef = useRef(null);
     const ytextInstanceRef = useRef(null);
+    const ydocRef = useRef(null);
     const onRunCodeRef = useRef(null);
 
     const handleParticipantsChange = useCallback((participants) => {
@@ -194,9 +195,12 @@ const EditorPage = () => {
 
     const handleConnectionStatusChange = useCallback(() => {}, []);
 
-    const handleEditorReady = useCallback((editor, ytext) => {
+    const handleEditorReady = useCallback((editor, ytext, ydoc) => {
         editorInstanceRef.current = editor;
         ytextInstanceRef.current = ytext;
+        if (ydoc) {
+            ydocRef.current = ydoc;
+        }
     }, []);
 
     // Send Realtime Chat Message
@@ -251,10 +255,13 @@ const EditorPage = () => {
                 }
             }
 
-            // 2. Multi-Tier Production Backend Cascade (Render Backend with fallback to Piston)
+            // 2. High-Performance Multi-Tier Backend Execution API
             if (!runResult) {
+                const apiBase = (process.env.REACT_APP_BACKEND_URL || (SOCKET_URL && SOCKET_URL.startsWith('http') ? SOCKET_URL : '')).replace(/\/+$/, '');
+                const execUrl = `${apiBase}/api/execute`;
+
                 try {
-                    const response = await fetch(`${SOCKET_URL}/api/execute`, {
+                    const response = await fetch(execUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -281,44 +288,53 @@ const EditorPage = () => {
                 }
             }
 
-            // 3. Resilient Public Fallback (Direct Piston Engine)
+            // 3. Resilient Direct Cloud Sandbox Engine (Judge0 CE)
             if (!runResult) {
                 try {
-                    const pistonLangMap = {
-                        javascript: 'javascript',
-                        js: 'javascript',
-                        python: 'python3',
-                        py: 'python3',
-                        cpp: 'cpp',
-                        'c++': 'cpp',
-                        c: 'c',
-                        java: 'java',
-                        go: 'go',
-                        rust: 'rust',
+                    const judge0Map = {
+                        javascript: 93,
+                        js: 93,
+                        python: 71,
+                        py: 71,
+                        cpp: 54,
+                        'c++': 54,
+                        c: 50,
+                        java: 62,
+                        go: 60,
+                        rust: 73,
+                        typescript: 74,
+                        ts: 74,
                     };
-                    const pistonLang = pistonLangMap[langKey] || langKey || 'python3';
-                    const pistonRes = await fetch('https://emkc.org/api/v2/piston/execute', {
+                    const langId = judge0Map[langKey] || 71;
+                    const judgeRes = await fetch('https://ce.judge0.com/submissions?base64_encoded=false&wait=true', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            language: pistonLang,
-                            version: '*',
-                            files: [{ content: code }],
-                            stdin: stdin,
+                            language_id: langId,
+                            source_code: code,
+                            stdin: stdin || '',
+                            cpu_time_limit: 5,
+                            memory_limit: 128000,
                         }),
                     });
 
-                    if (pistonRes.ok) {
-                        const data = await pistonRes.json();
+                    if (judgeRes.ok) {
+                        const data = await judgeRes.json();
                         const elapsed = Math.round(performance.now() - startTime);
-                        execTime = elapsed;
-                        compiler = `${data.language} ${data.version || ''}`.trim();
-                        if (data?.run) {
-                            runResult = data.run;
-                        }
+                        execTime = Math.round(parseFloat(data.time || 0) * 1000) || elapsed;
+                        compiler = `Sandbox (${data.status?.description || selectedLanguage.name})`;
+                        const stdout = data.stdout || '';
+                        const stderr = data.stderr || data.compile_output || data.message || '';
+                        const isSuccess = data.status?.id === 3;
+                        runResult = {
+                            stdout,
+                            stderr,
+                            code: isSuccess ? 0 : 1,
+                            output: stdout || stderr || '(No output produced)',
+                        };
                     }
-                } catch (pistonErr) {
-                    console.error('Direct fallback execution error:', pistonErr);
+                } catch (fallbackErr) {
+                    console.error('Direct fallback execution error:', fallbackErr);
                 }
             }
 
@@ -385,14 +401,29 @@ const EditorPage = () => {
         });
     };
 
-    // Create File
+    // Create File with Automatic Language Starter Template Binding
     const handleCreateFile = (name, parentId = null) => {
+        const newFileId = 'f_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
         const newFile = {
-            id: 'f_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+            id: newFileId,
             name,
             type: 'file',
             parentId,
         };
+
+        // Populate starter template for the newly created file's language
+        const fileLang = getLanguageByFilename(name);
+        if (fileLang && fileLang.starter && ydocRef.current) {
+            try {
+                const ytext = ydocRef.current.getText('file_' + newFileId);
+                if (ytext && ytext.length === 0) {
+                    ytext.insert(0, fileLang.starter);
+                }
+            } catch (e) {
+                console.warn('Could not populate initial starter in Yjs doc:', e);
+            }
+        }
+
         setFiles((prev) => [...prev, newFile]);
         setOpenFileIds((prev) => (prev.includes(newFile.id) ? prev : [...prev, newFile.id]));
         setActiveFileId(newFile.id);
@@ -407,6 +438,39 @@ const EditorPage = () => {
             parentId,
         };
         setFiles((prev) => [...prev, newFolder]);
+    };
+
+    // Rename Entry (File or Folder)
+    const handleRenameEntry = (itemId, newName) => {
+        const trimmed = newName.trim();
+        if (!trimmed) return;
+
+        setFiles((prev) =>
+            prev.map((f) => {
+                if (f.id === itemId) {
+                    if (f.type === 'file') {
+                        const newLang = getLanguageByFilename(trimmed);
+                        if (newLang) {
+                            setLanguageOverrides((prevLang) => ({
+                                ...prevLang,
+                                [itemId]: newLang,
+                            }));
+                            // If the file text is currently empty, inject new language starter
+                            if (ydocRef.current && newLang.starter) {
+                                try {
+                                    const ytext = ydocRef.current.getText('file_' + itemId);
+                                    if (ytext && ytext.length === 0) {
+                                        ytext.insert(0, newLang.starter);
+                                    }
+                                } catch {}
+                            }
+                        }
+                    }
+                    return { ...f, name: trimmed };
+                }
+                return f;
+            })
+        );
     };
 
     // Delete Entry (File or Folder)
@@ -806,6 +870,7 @@ const EditorPage = () => {
                             onCreateFile={handleCreateFile}
                             onCreateFolder={handleCreateFolder}
                             onDeleteEntry={handleDeleteEntry}
+                            onRenameEntry={handleRenameEntry}
                         />
                     ) : activeSidebarView === 'collaborators' ? (
                         <div className="collaboratorsView">

@@ -8,10 +8,13 @@ const Explorer = ({
     onCreateFile,
     onCreateFolder,
     onDeleteEntry,
+    onRenameEntry,
 }) => {
     const [isCreating, setIsCreating] = useState(null); // 'file' | 'folder' | null
     const [createParentId, setCreateParentId] = useState(null);
     const [newItemName, setNewItemName] = useState('');
+    const [renamingId, setRenamingId] = useState(null);
+    const [renameValue, setRenameValue] = useState('');
     const [expandedFolders, setExpandedFolders] = useState({ root: true });
     const [isWorkspaceCollapsed, setIsWorkspaceCollapsed] = useState(false);
 
@@ -26,12 +29,30 @@ const Explorer = ({
         setIsCreating(type);
         setCreateParentId(parentId);
         setNewItemName('');
+        setRenamingId(null);
         if (parentId) {
             setExpandedFolders((prev) => ({ ...prev, [parentId]: true }));
         }
         if (isWorkspaceCollapsed) {
             setIsWorkspaceCollapsed(false);
         }
+    };
+
+    const handleStartRename = (item, e) => {
+        e?.stopPropagation();
+        setRenamingId(item.id);
+        setRenameValue(item.name);
+        setIsCreating(null);
+    };
+
+    const handleRenameSubmit = (itemId, e) => {
+        e?.preventDefault();
+        const trimmed = renameValue.trim();
+        if (trimmed && onRenameEntry) {
+            onRenameEntry(itemId, trimmed);
+        }
+        setRenamingId(null);
+        setRenameValue('');
     };
 
     const handleCreateSubmit = (e) => {
@@ -66,6 +87,7 @@ const Explorer = ({
                     const isFolder = item.type === 'folder';
                     const isExpanded = isFolder ? Boolean(expandedFolders[item.id]) : false;
                     const isActive = !isFolder && item.id === activeFileId;
+                    const isRenamingThis = renamingId === item.id;
 
                     return (
                         <div key={item.id} className="explorerTreeItemWrapper">
@@ -73,6 +95,7 @@ const Explorer = ({
                                 className={`explorerRow ${isActive ? 'activeFile' : ''} ${isFolder ? 'folderRow' : 'fileRow'}`}
                                 style={{ paddingLeft: `${level * 14 + 10}px` }}
                                 onClick={() => {
+                                    if (isRenamingThis) return;
                                     if (isFolder) {
                                         toggleFolder(item.id);
                                     } else {
@@ -83,7 +106,36 @@ const Explorer = ({
                                 <span className="explorerItemIcon">
                                     {getFileIcon(item.name, isFolder, isExpanded)}
                                 </span>
-                                <span className="explorerItemName">{item.name}</span>
+
+                                {isRenamingThis ? (
+                                    <form
+                                        className="explorerInlineRenameForm"
+                                        onSubmit={(e) => handleRenameSubmit(item.id, e)}
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <input
+                                            type="text"
+                                            autoFocus
+                                            className="explorerRenameInput"
+                                            value={renameValue}
+                                            onChange={(e) => setRenameValue(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Escape') {
+                                                    setRenamingId(null);
+                                                }
+                                            }}
+                                            onBlur={() => handleRenameSubmit(item.id)}
+                                        />
+                                    </form>
+                                ) : (
+                                    <span
+                                        className="explorerItemName"
+                                        title={`${item.name} (Double-click to rename)`}
+                                        onDoubleClick={(e) => handleStartRename(item, e)}
+                                    >
+                                        {item.name}
+                                    </span>
+                                )}
 
                                 <div className="explorerRowActions" onClick={(e) => e.stopPropagation()}>
                                     {isFolder && (
@@ -91,6 +143,7 @@ const Explorer = ({
                                             <button
                                                 type="button"
                                                 className="rowActionBtn"
+                                                title="New File Inside"
                                                 onClick={() => handleStartCreate('file', item.id)}
                                             >
                                                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2">
@@ -102,6 +155,7 @@ const Explorer = ({
                                             <button
                                                 type="button"
                                                 className="rowActionBtn"
+                                                title="New Folder Inside"
                                                 onClick={() => handleStartCreate('folder', item.id)}
                                             >
                                                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2">
@@ -114,7 +168,19 @@ const Explorer = ({
                                     )}
                                     <button
                                         type="button"
+                                        className="rowActionBtn"
+                                        title={`Rename ${isFolder ? 'Folder' : 'File'}`}
+                                        onClick={(e) => handleStartRename(item, e)}
+                                    >
+                                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        type="button"
                                         className="rowActionBtn danger"
+                                        title={`Delete ${isFolder ? 'Folder' : 'File'}`}
                                         onClick={() => onDeleteEntry(item)}
                                     >
                                         ✕

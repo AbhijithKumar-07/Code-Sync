@@ -159,6 +159,67 @@ const dev: Developer = {
 console.log(\`Hello \${dev.name} from Code-Sync! Working in \${dev.language}.\`);
 `,
     },
+    {
+        id: 'html',
+        name: 'HTML',
+        file: 'index.html',
+        icon: '🌐',
+        mode: 'htmlmixed',
+        extension: 'html',
+        starter: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code-Sync Workspace</title>
+</head>
+<body>
+    <h1>Hello from Code-Sync!</h1>
+    <p>Live collaborative coding environment.</p>
+</body>
+</html>
+`,
+    },
+    {
+        id: 'css',
+        name: 'CSS',
+        file: 'styles.css',
+        icon: '🎨',
+        mode: 'css',
+        extension: 'css',
+        starter: `/* Code-Sync Stylesheet */
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Inter', sans-serif;
+    background: #0f111a;
+    color: #ffffff;
+}
+
+h1 {
+    color: #4aed88;
+}
+`,
+    },
+    {
+        id: 'json',
+        name: 'JSON',
+        file: 'data.json',
+        icon: '📋',
+        mode: 'application/json',
+        extension: 'json',
+        starter: `{
+  "project": "Code-Sync",
+  "version": "2.0.0",
+  "collaborative": true,
+  "features": [
+    "real-time editing",
+    "multi-language execution",
+    "multi-file workspace"
+  ]
+}
+`,
+    },
 ];
 
 export const THEMES = [
@@ -175,33 +236,63 @@ export const FONT_SIZES = ['13px', '14px', '15px', '16px', '18px', '20px'];
 export const getLanguageByFilename = (filename) => {
     if (!filename) return LANGUAGES[0];
     const ext = filename.split('.').pop()?.toLowerCase();
+    const baseName = filename.split('.')[0] || 'Main';
+
+    let lang = null;
     switch (ext) {
         case 'js':
         case 'jsx':
         case 'mjs':
-            return LANGUAGES.find((l) => l.id === 'javascript') || LANGUAGES[0];
+            lang = LANGUAGES.find((l) => l.id === 'javascript');
+            break;
         case 'py':
-            return LANGUAGES.find((l) => l.id === 'python') || LANGUAGES[0];
+            lang = LANGUAGES.find((l) => l.id === 'python');
+            break;
         case 'cpp':
         case 'cc':
         case 'cxx':
         case 'hpp':
         case 'h':
-            return LANGUAGES.find((l) => l.id === 'cpp') || LANGUAGES[0];
-        case 'java':
-            return LANGUAGES.find((l) => l.id === 'java') || LANGUAGES[0];
+            lang = LANGUAGES.find((l) => l.id === 'cpp');
+            break;
+        case 'java': {
+            const javaLang = LANGUAGES.find((l) => l.id === 'java');
+            if (javaLang && baseName && baseName !== 'Main') {
+                // Return customized starter with exact matching class name
+                const customStarter = `// Java Playground - Code Sync\npublic class ${baseName} {\n    public static void main(String[] args) {\n        System.out.println("Hello from Code-Sync Java!");\n        int a = 15;\n        int b = 27;\n        System.out.println("Result: " + a + " + " + b + " = " + (a + b));\n    }\n}\n`;
+                return { ...javaLang, starter: customStarter };
+            }
+            lang = javaLang;
+            break;
+        }
         case 'c':
-            return LANGUAGES.find((l) => l.id === 'c') || LANGUAGES[0];
+            lang = LANGUAGES.find((l) => l.id === 'c');
+            break;
         case 'go':
-            return LANGUAGES.find((l) => l.id === 'go') || LANGUAGES[0];
+            lang = LANGUAGES.find((l) => l.id === 'go');
+            break;
         case 'rs':
-            return LANGUAGES.find((l) => l.id === 'rust') || LANGUAGES[0];
+            lang = LANGUAGES.find((l) => l.id === 'rust');
+            break;
         case 'ts':
         case 'tsx':
-            return LANGUAGES.find((l) => l.id === 'typescript') || LANGUAGES[0];
+            lang = LANGUAGES.find((l) => l.id === 'typescript');
+            break;
+        case 'html':
+        case 'htm':
+            lang = LANGUAGES.find((l) => l.id === 'html');
+            break;
+        case 'css':
+            lang = LANGUAGES.find((l) => l.id === 'css');
+            break;
+        case 'json':
+            lang = LANGUAGES.find((l) => l.id === 'json');
+            break;
         default:
-            return LANGUAGES.find((l) => l.extension === ext) || LANGUAGES[0];
+            lang = LANGUAGES.find((l) => l.extension === ext);
+            break;
     }
+    return lang || LANGUAGES[0];
 };
 
 export const getFileIcon = (filename, isFolder = false, isExpanded = false) => {
