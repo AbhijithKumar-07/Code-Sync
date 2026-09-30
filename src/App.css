@@ -143,6 +143,39 @@ body {
     background: #141724;
 }
 
+.roomIdInputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.roomIdInputWrapper .inputBox {
+    width: 100%;
+    padding-right: 44px;
+}
+
+.toggleVisibilityBtn {
+    position: absolute;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.toggleVisibilityBtn:hover {
+    color: var(--primary-accent);
+    background: rgba(74, 237, 136, 0.1);
+}
+
 .inputBox::placeholder {
     color: #4b556f;
     font-weight: 500;
