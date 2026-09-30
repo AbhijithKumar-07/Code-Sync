@@ -159,67 +159,6 @@ const dev: Developer = {
 console.log(\`Hello \${dev.name} from Code-Sync! Working in \${dev.language}.\`);
 `,
     },
-    {
-        id: 'html',
-        name: 'HTML',
-        file: 'index.html',
-        icon: '🌐',
-        mode: 'htmlmixed',
-        extension: 'html',
-        starter: `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Code-Sync Workspace</title>
-</head>
-<body>
-    <h1>Hello from Code-Sync!</h1>
-    <p>Live collaborative coding environment.</p>
-</body>
-</html>
-`,
-    },
-    {
-        id: 'css',
-        name: 'CSS',
-        file: 'styles.css',
-        icon: '🎨',
-        mode: 'css',
-        extension: 'css',
-        starter: `/* Code-Sync Stylesheet */
-body {
-    margin: 0;
-    padding: 20px;
-    font-family: 'Inter', sans-serif;
-    background: #0f111a;
-    color: #ffffff;
-}
-
-h1 {
-    color: #4aed88;
-}
-`,
-    },
-    {
-        id: 'json',
-        name: 'JSON',
-        file: 'data.json',
-        icon: '📋',
-        mode: 'application/json',
-        extension: 'json',
-        starter: `{
-  "project": "Code-Sync",
-  "version": "2.0.0",
-  "collaborative": true,
-  "features": [
-    "real-time editing",
-    "multi-language execution",
-    "multi-file workspace"
-  ]
-}
-`,
-    },
 ];
 
 export const THEMES = [
@@ -278,16 +217,6 @@ export const getLanguageByFilename = (filename) => {
         case 'tsx':
             lang = LANGUAGES.find((l) => l.id === 'typescript');
             break;
-        case 'html':
-        case 'htm':
-            lang = LANGUAGES.find((l) => l.id === 'html');
-            break;
-        case 'css':
-            lang = LANGUAGES.find((l) => l.id === 'css');
-            break;
-        case 'json':
-            lang = LANGUAGES.find((l) => l.id === 'json');
-            break;
         default:
             lang = LANGUAGES.find((l) => l.extension === ext);
             break;
@@ -319,14 +248,10 @@ export const getFileIcon = (filename, isFolder = false, isExpanded = false) => {
             return '🐹';
         case 'rs':
             return '🦀';
-        case 'html':
-            return '🌐';
-        case 'css':
-            return '🎨';
-        case 'json':
-            return '📋';
         case 'md':
             return '📝';
+        case 'txt':
+            return '📄';
         default:
             return '📄';
     }
