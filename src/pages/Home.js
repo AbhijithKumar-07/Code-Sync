@@ -6,17 +6,31 @@ import { useNavigate } from 'react-router-dom';
 const Home = () => {
     const navigate = useNavigate();
 
-    const [roomId, setRoomId] = useState('');
-    const [username, setUsername] = useState('');
+    const [roomId, setRoomId] = useState(() => {
+        return sessionStorage.getItem('codesync_draft_room_id') || '';
+    });
+    const [username, setUsername] = useState(() => {
+        return sessionStorage.getItem('codesync_draft_username') || '';
+    });
 
     const [showRoomId, setShowRoomId] = useState(false);
 
     const handleRoomIdChange = (val) => {
         setRoomId(val);
+        if (val) {
+            sessionStorage.setItem('codesync_draft_room_id', val);
+        } else {
+            sessionStorage.removeItem('codesync_draft_room_id');
+        }
     };
 
     const handleUsernameChange = (val) => {
         setUsername(val);
+        if (val) {
+            sessionStorage.setItem('codesync_draft_username', val);
+        } else {
+            sessionStorage.removeItem('codesync_draft_username');
+        }
     };
 
     const createNewRoom = (e) => {
