@@ -57,13 +57,17 @@ const Console = ({
 
                     {!isRunning && executionTime !== null && (
                         <span className="terminalMetricChip">
-                            ⚡ {executionTime} ms
+                            <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" className="metricBoltIcon">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                            </svg>
+                            <span>{executionTime} ms</span>
                         </span>
                     )}
 
                     {!isRunning && status && (
                         <span className={`terminalExitBadge ${status}`}>
-                            {status === 'success' ? '✓ Exit 0' : '✗ Error'}
+                            <span className="terminalExitDot" />
+                            <span className="terminalExitText">{status === 'success' ? 'Exit 0' : 'Exit 1'}</span>
                         </span>
                     )}
 

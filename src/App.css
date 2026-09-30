@@ -2096,75 +2096,130 @@ body {
 }
 
 .terminalRunningChip {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
-    color: var(--status-warning);
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    color: #fbbf24;
+    font-size: 11px;
     font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 9999px;
 }
 
 .terminalSpinDot {
-    width: 10px;
-    height: 10px;
-    border: 2px solid rgba(245, 158, 11, 0.3);
-    border-top-color: var(--status-warning);
+    width: 8px;
+    height: 8px;
+    border: 1.5px solid rgba(245, 158, 11, 0.3);
+    border-top-color: #fbbf24;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
 
 .terminalMetricChip {
-    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
     font-family: var(--font-code);
     font-size: 11px;
+    font-weight: 600;
+    padding: 2.5px 8px;
+    border-radius: 9999px;
+    letter-spacing: -0.01em;
+}
+
+.metricBoltIcon {
+    color: #f59e0b;
+    filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.5));
 }
 
 .terminalExitBadge {
-    font-size: 10px;
-    font-weight: 800;
-    padding: 2px 6px;
-    border-radius: 4px;
-    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 5.5px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-code);
+    letter-spacing: 0.02em;
+    padding: 2.5px 9px;
+    border-radius: 9999px;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.terminalExitDot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    display: inline-block;
 }
 
 .terminalExitBadge.success {
-    background: rgba(74, 237, 136, 0.15);
-    color: var(--status-success);
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34d399;
+}
+
+.terminalExitBadge.success .terminalExitDot {
+    background: #34d399;
+    box-shadow: 0 0 7px #34d399;
 }
 
 .terminalExitBadge.error {
-    background: rgba(239, 68, 68, 0.15);
-    color: var(--status-error);
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+}
+
+.terminalExitBadge.error .terminalExitDot {
+    background: #f87171;
+    box-shadow: 0 0 7px #f87171;
 }
 
 .terminalCompilerTag {
-    background: #1e2438;
+    display: inline-flex;
+    align-items: center;
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     color: #94a3b8;
     font-family: var(--font-code);
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2.5px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.01em;
 }
 
 .terminalIconBtn {
-    background: transparent;
-    border: 1px solid var(--border-subtle);
-    color: var(--text-muted);
-    border-radius: 4px;
-    padding: 2px 7px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    border-radius: 6px;
+    padding: 3px 8px;
     font-size: 11px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .terminalIconBtn:hover {
-    color: var(--text-main);
-    background: var(--bg-surface-hover);
-    border-color: var(--border-strong);
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.18);
 }
 
 .terminalIconBtn.close:hover {
-    color: var(--status-error);
-    border-color: var(--status-error);
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
 }
 
 /* Terminal Body */
