@@ -28,6 +28,12 @@ const Home = () => {
 
     const createNewRoom = (e) => {
         e.preventDefault();
+        if (roomId && roomId.trim().length > 0) {
+            toast('Room ID is already generated! Enter username to join.', {
+                icon: '🔑',
+            });
+            return;
+        }
         const id = uuidV4();
         handleRoomIdChange(id);
         toast.success('Generated New Room ID');
@@ -69,16 +75,24 @@ const Home = () => {
                 </div>
 
                 <div className="homeFormHeader">
-                    <span className="mainLabelBadge">REALTIME COLLABORATION</span>
-                    <h4 className="mainLabel">Paste Invitation Room ID</h4>
+                    <h3 className="mainLabel">Paste Invitation Room ID</h3>
+                    <p className="mainSubLabel">Enter a room ID and your name to join live collaboration</p>
                 </div>
 
                 <div className="inputGroup">
                     <div className="inputFieldWrapper">
-                        <div className="roomIdInputWrapper">
+                        <div className="inputWithIconWrapper">
+                            <span className="inputLeadingIcon">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <line x1="4" y1="9" x2="20" y2="9" />
+                                    <line x1="4" y1="15" x2="20" y2="15" />
+                                    <line x1="10" y1="3" x2="8" y2="21" />
+                                    <line x1="16" y1="3" x2="14" y2="21" />
+                                </svg>
+                            </span>
                             <input
                                 type={showRoomId ? 'text' : 'password'}
-                                className={`inputBox roomIdInput ${!showRoomId && roomId ? 'isMasked' : ''}`}
+                                className={`inputBox withIcon ${!showRoomId && roomId ? 'isMasked' : ''}`}
                                 placeholder="ROOM ID"
                                 onChange={(e) => handleRoomIdChange(e.target.value)}
                                 value={roomId}
@@ -111,15 +125,23 @@ const Home = () => {
                     </div>
 
                     <div className="inputFieldWrapper">
-                        <input
-                            type="text"
-                            className="inputBox"
-                            placeholder="USERNAME"
-                            onChange={(e) => handleUsernameChange(e.target.value)}
-                            value={username}
-                            onKeyUp={handleInputEnter}
-                            autoComplete="off"
-                        />
+                        <div className="inputWithIconWrapper">
+                            <span className="inputLeadingIcon">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg>
+                            </span>
+                            <input
+                                type="text"
+                                className="inputBox withIcon"
+                                placeholder="USERNAME"
+                                onChange={(e) => handleUsernameChange(e.target.value)}
+                                value={username}
+                                onKeyUp={handleInputEnter}
+                                autoComplete="off"
+                            />
+                        </div>
                     </div>
 
                     <button className="btn joinBtn" onClick={joinRoom}>
@@ -131,17 +153,16 @@ const Home = () => {
                     </button>
 
                     <div className="createRoomHelper">
-                        <span className="createPrompt">Don't have an invite code?</span>
+                        <span className="createPrompt">Don't have an invite?</span>
                         <button
                             type="button"
                             onClick={createNewRoom}
                             className="createNewRoomBtn"
                         >
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="12" y1="5" x2="12" y2="19" />
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                            </svg>
                             <span>Create New Room</span>
+                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg>
                         </button>
                     </div>
                 </div>
@@ -159,7 +180,7 @@ const Home = () => {
                         className="authorLink"
                     >
                         <span>Abhijith Kumar</span>
-                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="7" y1="17" x2="17" y2="7" />
                             <polyline points="7 7 17 7 17 17" />
                         </svg>
