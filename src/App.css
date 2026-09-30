@@ -1005,238 +1005,144 @@ body {
     height: 6px;
     border-radius: 50%;
 }/* ==========================================================================
-   MODERN LIVE NETWORK SPEED CARD (MINIMALIST & ULTRA-SLEEK)
+   OPTION 3: ULTRA-SLEEK COMPACT LATENCY STATUS STRIP
    ========================================================================== */
-.networkSpeedCard {
-    background: linear-gradient(160deg, rgba(22, 28, 46, 0.88) 0%, rgba(12, 15, 26, 0.95) 100%);
+.latencyStatusStrip {
+    background: linear-gradient(135deg, rgba(20, 25, 42, 0.8) 0%, rgba(12, 15, 26, 0.9) 100%);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 13px 14px 13px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.07);
-    backdrop-filter: blur(16px);
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-.networkSpeedCard::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(74, 237, 136, 0.35) 50%, transparent 100%);
-    pointer-events: none;
-}
-
-.networkSpeedCard:hover {
-    border-color: rgba(74, 237, 136, 0.25);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 20px rgba(74, 237, 136, 0.08);
-    transform: translateY(-1px);
-}
-
-.speedCardHeader {
+    border-radius: 10px;
+    padding: 8px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(14px);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-top: 4px;
 }
 
-.speedTitleWithDot {
+.latencyStatusStrip:hover {
+    border-color: rgba(74, 237, 136, 0.25);
+    background: linear-gradient(135deg, rgba(24, 30, 50, 0.85) 0%, rgba(14, 18, 30, 0.95) 100%);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 14px rgba(74, 237, 136, 0.08);
+}
+
+.latencyStripLeft {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
 }
 
-/* Animated Heartbeat / ECG Waveform */
 .heartbeatWaveSvg {
-    width: 22px;
-    height: 12px;
+    width: 20px;
+    height: 11px;
     color: #34d399;
     filter: drop-shadow(0 0 4px rgba(52, 211, 153, 0.6));
     animation: heartbeatScan 2s infinite ease-in-out;
 }
 
 @keyframes heartbeatScan {
-    0% {
-        opacity: 0.6;
+    0%, 100% {
+        opacity: 0.65;
         transform: scale(0.96);
     }
-    30% {
+    35% {
         opacity: 1;
-        transform: scale(1.06);
-        filter: drop-shadow(0 0 7px rgba(52, 211, 153, 0.85));
+        transform: scale(1.08);
+        filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.85));
     }
-    60% {
-        opacity: 0.7;
+    70% {
+        opacity: 0.75;
         transform: scale(0.98);
     }
-    100% {
-        opacity: 0.6;
-        transform: scale(0.96);
-    }
 }
 
-.speedCardHeading {
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.09em;
-    color: #94a3b8;
-    text-transform: uppercase;
-}
-
-/* Sleek Minimalist Quality Pill */
-.speedQualityTag {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    padding: 2.5px 8px;
-    border-radius: 999px;
-    line-height: 1.2;
-    transition: all 0.2s ease;
-}
-
-.speedTagDot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-.speedQualityTag.ultrafast {
-    background: rgba(16, 185, 129, 0.12);
-    color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.28);
-}
-.speedQualityTag.ultrafast .speedTagDot {
-    background: #34d399;
-    box-shadow: 0 0 6px #34d399;
-}
-
-.speedQualityTag.fast {
-    background: rgba(34, 197, 94, 0.12);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.28);
-}
-.speedQualityTag.fast .speedTagDot {
-    background: #4ade80;
-    box-shadow: 0 0 6px #4ade80;
-}
-
-.speedQualityTag.good {
-    background: rgba(132, 204, 22, 0.12);
-    color: #a3e635;
-    border: 1px solid rgba(132, 204, 22, 0.28);
-}
-.speedQualityTag.good .speedTagDot {
-    background: #a3e635;
-    box-shadow: 0 0 6px #a3e635;
-}
-
-.speedQualityTag.normal {
-    background: rgba(245, 158, 11, 0.12);
-    color: #fbbf24;
-    border: 1px solid rgba(245, 158, 11, 0.28);
-}
-.speedQualityTag.normal .speedTagDot {
-    background: #fbbf24;
-    box-shadow: 0 0 6px #fbbf24;
-}
-
-.speedQualityTag.measuring {
-    background: rgba(148, 163, 184, 0.12);
-    color: #94a3b8;
-    border: 1px solid rgba(148, 163, 184, 0.25);
-}
-.speedQualityTag.measuring .speedTagDot {
-    background: #94a3b8;
-    animation: meterPulse 1.2s infinite ease-in-out;
-}
-
-.speedMetricRow {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    padding: 2px 0 0;
-}
-
-.speedMetricValGroup {
-    display: flex;
-    align-items: baseline;
-    gap: 3px;
-}
-
-.speedNumber {
-    font-size: 24px;
+.stripMetricVal {
+    font-size: 13px;
     font-weight: 800;
     font-family: var(--font-code);
     color: #f8fafc;
-    line-height: 1;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
 }
 
-.speedUnit {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: #34d399;
-    font-family: var(--font-code);
-}
-
-.speedMetricSubtitle {
+.stripMetricLabel {
     font-size: 11px;
     font-weight: 600;
     color: #64748b;
 }
 
-.speedMeterTrack {
-    height: 4px;
-    background: rgba(255, 255, 255, 0.06);
+/* Minimalist Quality Badge */
+.stripQualityTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 2px 7px;
     border-radius: 999px;
-    overflow: hidden;
-    margin-top: 1px;
+    line-height: 1.2;
+    transition: all 0.2s ease;
 }
 
-.speedMeterBar {
-    height: 100%;
-    border-radius: 999px;
-    transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease;
+.stripTagDot {
+    width: 4.5px;
+    height: 4.5px;
+    border-radius: 50%;
+    display: inline-block;
 }
 
-.speedMeterBar.ultrafast {
-    width: 100%;
-    background: linear-gradient(90deg, #10b981, #34d399);
-    box-shadow: 0 0 8px rgba(52, 211, 153, 0.55);
+.stripQualityTag.ultrafast {
+    background: rgba(16, 185, 129, 0.12);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.28);
+}
+.stripQualityTag.ultrafast .stripTagDot {
+    background: #34d399;
+    box-shadow: 0 0 6px #34d399;
 }
 
-.speedMeterBar.fast {
-    width: 80%;
-    background: linear-gradient(90deg, #22c55e, #4ade80);
-    box-shadow: 0 0 6px rgba(74, 222, 128, 0.4);
+.stripQualityTag.fast {
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.28);
+}
+.stripQualityTag.fast .stripTagDot {
+    background: #4ade80;
+    box-shadow: 0 0 6px #4ade80;
 }
 
-.speedMeterBar.good {
-    width: 60%;
-    background: linear-gradient(90deg, #84cc16, #a3e635);
+.stripQualityTag.good {
+    background: rgba(132, 204, 22, 0.12);
+    color: #a3e635;
+    border: 1px solid rgba(132, 204, 22, 0.28);
+}
+.stripQualityTag.good .stripTagDot {
+    background: #a3e635;
+    box-shadow: 0 0 6px #a3e635;
 }
 
-.speedMeterBar.normal {
-    width: 40%;
-    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+.stripQualityTag.normal {
+    background: rgba(245, 158, 11, 0.12);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.28);
+}
+.stripQualityTag.normal .stripTagDot {
+    background: #fbbf24;
+    box-shadow: 0 0 6px #fbbf24;
 }
 
-.speedMeterBar.measuring {
-    width: 50%;
-    background: #64748b;
-    animation: meterPulse 1.2s infinite ease-in-out;
+.stripQualityTag.measuring {
+    background: rgba(148, 163, 184, 0.12);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+}
+.stripQualityTag.measuring .stripTagDot {
+    background: #94a3b8;
+    animation: stripDotPulse 1.2s infinite ease-in-out;
 }
 
-@keyframes meterPulse {
+@keyframes stripDotPulse {
     0%, 100% { opacity: 0.35; }
     50% { opacity: 0.9; }
 }

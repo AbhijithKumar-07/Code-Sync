@@ -14,6 +14,10 @@ export const initSocket = async () => {
         timeout: 10000,
         transports: ['websocket'],
         upgrade: false,
+        perMessageDeflate: false,
+        autoConnect: true,
+        reconnectionDelay: 500,
+        reconnectionDelayMax: 2000,
     };
     return io(SOCKET_URL, options);
 };

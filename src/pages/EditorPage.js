@@ -772,33 +772,20 @@ const EditorPage = () => {
                                 ))}
                             </div>
 
-                            {/* Ultra-Clean Live Network Speed Card */}
-                            <div className="networkSpeedCard">
-                                <div className="speedCardHeader">
-                                    <div className="speedTitleWithDot">
-                                        <svg className="heartbeatWaveSvg" viewBox="0 0 32 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M1 8h6l2.5-6 4 12 3-8 2.5 4h8" />
-                                        </svg>
-                                        <span className="speedCardHeading">NETWORK SPEED</span>
-                                    </div>
-                                    <div className={`speedQualityTag ${speedCategory.toLowerCase().replace(/[^a-z]/g, '')}`}>
-                                        <span className="speedTagDot" />
-                                        <span>{speedCategory}</span>
-                                    </div>
+                            {/* Option 3: Ultra-Sleek Single-Line Status Capsule */}
+                            <div className="latencyStatusStrip">
+                                <div className="latencyStripLeft">
+                                    <svg className="heartbeatWaveSvg" viewBox="0 0 32 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M1 8h6l2.5-6 4 12 3-8 2.5 4h8" />
+                                    </svg>
+                                    <span className="stripMetricVal">
+                                        {networkLatency === null ? '--' : Math.round(networkLatency)} ms
+                                    </span>
+                                    <span className="stripMetricLabel">Response</span>
                                 </div>
-
-                                <div className="speedMetricRow">
-                                    <div className="speedMetricValGroup">
-                                        <span className="speedNumber">
-                                            {networkLatency === null ? '--' : Math.round(networkLatency)}
-                                        </span>
-                                        <span className="speedUnit">ms</span>
-                                    </div>
-                                    <span className="speedMetricSubtitle">Response Time</span>
-                                </div>
-
-                                <div className="speedMeterTrack">
-                                    <div className={`speedMeterBar ${speedCategory.toLowerCase().replace(/[^a-z]/g, '')}`} />
+                                <div className={`stripQualityTag ${speedCategory.toLowerCase().replace(/[^a-z]/g, '')}`}>
+                                    <span className="stripTagDot" />
+                                    <span>{speedCategory}</span>
                                 </div>
                             </div>
                         </div>
