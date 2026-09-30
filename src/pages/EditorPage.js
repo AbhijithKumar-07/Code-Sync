@@ -510,16 +510,15 @@ const EditorPage = () => {
 
         const handlePongCheck = (sentAt) => {
             if (typeof sentAt !== 'number') return;
-            const rtt = performance.now() - sentAt;
+            const rtt = Math.max(1, Math.round(performance.now() - sentAt));
             if (warmupCountRef.current < 2) {
                 warmupCountRef.current += 1;
                 return;
             }
 
-            // Calculate one-way synchronization latency (RTT / 2)
-            const syncLatency = Math.max(12, Math.round(rtt / 2));
+            // Record true full Round-Trip Time (RTT)
             const samples = latencySamplesRef.current;
-            samples.push(syncLatency);
+            samples.push(rtt);
             if (samples.length > 10) samples.shift();
 
             const average =
@@ -789,8 +788,8 @@ const EditorPage = () => {
 
                                 <div className="syncLatencyRow">
                                     <div className="latencyLabelGroup">
-                                        <span className="latencyMetricTitle">Sync Latency</span>
-                                        <span className="latencySubtitle">Keystroke propagation</span>
+                                        <span className="latencyMetricTitle">Network RTT</span>
+                                        <span className="latencySubtitle">Full round-trip time</span>
                                     </div>
                                     <div className="latencyValueBox">
                                         <span className="latencyNumber">
