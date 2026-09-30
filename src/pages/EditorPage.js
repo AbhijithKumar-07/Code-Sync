@@ -772,16 +772,19 @@ const EditorPage = () => {
                                 ))}
                             </div>
 
-                            {/* Ultra-Modern Live Speed & Responsiveness Card */}
+                            {/* Ultra-Clean Live Network Speed Card */}
                             <div className="networkSpeedCard">
                                 <div className="speedCardHeader">
                                     <div className="speedTitleWithDot">
-                                        <span className="livePulseDot" />
+                                        <svg className="heartbeatWaveSvg" viewBox="0 0 32 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M1 8h6l2.5-6 4 12 3-8 2.5 4h8" />
+                                        </svg>
                                         <span className="speedCardHeading">NETWORK SPEED</span>
                                     </div>
-                                    <span className={`speedQualityTag ${speedCategory.toLowerCase().replace(/[^a-z]/g, '')}`}>
-                                        {speedCategory}
-                                    </span>
+                                    <div className={`speedQualityTag ${speedCategory.toLowerCase().replace(/[^a-z]/g, '')}`}>
+                                        <span className="speedTagDot" />
+                                        <span>{speedCategory}</span>
+                                    </div>
                                 </div>
 
                                 <div className="speedMetricRow">
@@ -791,21 +794,11 @@ const EditorPage = () => {
                                         </span>
                                         <span className="speedUnit">ms</span>
                                     </div>
-                                    <span className="speedMetricSubtitle">Server Latency</span>
+                                    <span className="speedMetricSubtitle">Response Time</span>
                                 </div>
 
                                 <div className="speedMeterTrack">
                                     <div className={`speedMeterBar ${speedCategory.toLowerCase().replace(/[^a-z]/g, '')}`} />
-                                </div>
-
-                                <div className="speedCardFooter">
-                                    <span className="speedFooterStatus">
-                                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                        Live Collaborative Sync
-                                    </span>
-                                    <span className="speedFooterNode">Cloud Node</span>
                                 </div>
                             </div>
                         </div>
