@@ -13,6 +13,7 @@ const Explorer = ({
     const [createParentId, setCreateParentId] = useState(null);
     const [newItemName, setNewItemName] = useState('');
     const [expandedFolders, setExpandedFolders] = useState({ root: true });
+    const [isWorkspaceCollapsed, setIsWorkspaceCollapsed] = useState(false);
 
     const toggleFolder = (folderId) => {
         setExpandedFolders((prev) => ({
@@ -27,6 +28,9 @@ const Explorer = ({
         setNewItemName('');
         if (parentId) {
             setExpandedFolders((prev) => ({ ...prev, [parentId]: true }));
+        }
+        if (isWorkspaceCollapsed) {
+            setIsWorkspaceCollapsed(false);
         }
     };
 
@@ -83,17 +87,37 @@ const Explorer = ({
 
                                 <div className="explorerRowActions" onClick={(e) => e.stopPropagation()}>
                                     {isFolder && (
-                                        <button
-                                            type="button"
-                                            className="rowActionBtn"
-                                            onClick={() => handleStartCreate('file', item.id)}
-                                        >
-                                            +
-                                        </button>
+                                        <>
+                                            <button
+                                                type="button"
+                                                className="rowActionBtn"
+                                                title="New File Inside"
+                                                onClick={() => handleStartCreate('file', item.id)}
+                                            >
+                                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                                    <line x1="12" y1="11" x2="12" y2="17" />
+                                                    <line x1="9" y1="14" x2="15" y2="14" />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="rowActionBtn"
+                                                title="New Subfolder"
+                                                onClick={() => handleStartCreate('folder', item.id)}
+                                            >
+                                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                                                    <line x1="12" y1="11" x2="12" y2="17" />
+                                                    <line x1="9" y1="14" x2="15" y2="14" />
+                                                </svg>
+                                            </button>
+                                        </>
                                     )}
                                     <button
                                         type="button"
                                         className="rowActionBtn danger"
+                                        title="Delete"
                                         onClick={() => onDeleteEntry(item)}
                                     >
                                         ✕
@@ -101,10 +125,7 @@ const Explorer = ({
                                 </div>
                             </div>
 
-                            {/* Render children if folder is expanded */}
-                            {isFolder && isExpanded && renderTree(item.id, level + 1)}
-
-                            {/* Inline creation input inside this folder */}
+                            {/* Render inline creation form inside this folder if active */}
                             {isFolder && isExpanded && isCreating && createParentId === item.id && (
                                 <form
                                     className="explorerInlineForm"
@@ -118,7 +139,7 @@ const Explorer = ({
                                         type="text"
                                         autoFocus
                                         className="explorerInlineInput"
-                                        placeholder={isCreating === 'folder' ? 'folder-name' : 'filename.js'}
+                                        placeholder={isCreating === 'folder' ? 'subfolder-name' : 'filename.js'}
                                         value={newItemName}
                                         onChange={(e) => setNewItemName(e.target.value)}
                                         onKeyDown={(e) => {
@@ -130,6 +151,9 @@ const Explorer = ({
                                     />
                                 </form>
                             )}
+
+                            {/* Render children if folder is expanded */}
+                            {isFolder && isExpanded && renderTree(item.id, level + 1)}
                         </div>
                     );
                 })}
@@ -139,78 +163,94 @@ const Explorer = ({
 
     return (
         <div className="explorerSidebarContainer">
-            <div className="explorerActionBar">
-                <span className="explorerSectionTitle">WORKSPACE FILES</span>
+            {/* Clean Section Header (VS Code Style) */}
+            <div className="explorerSectionHeader">
+                <div 
+                    className="sectionTitleGroup"
+                    onClick={() => setIsWorkspaceCollapsed((prev) => !prev)}
+                >
+                    <span className={`sectionChevron ${isWorkspaceCollapsed ? 'collapsed' : ''}`}>▾</span>
+                    <span className="explorerSectionTitle">WORKSPACE</span>
+                </div>
                 <div className="explorerActionBtnsGroup">
                     <button
                         type="button"
-                        className="explorerTopBtn"
-                        onClick={() => handleStartCreate('file', null)}
+                        className="explorerActionIconBtn"
+                        title="New File"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleStartCreate('file', null);
+                        }}
                     >
                         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                             <line x1="12" y1="11" x2="12" y2="17" />
                             <line x1="9" y1="14" x2="15" y2="14" />
                         </svg>
-                        <span>New File</span>
                     </button>
                     <button
                         type="button"
-                        className="explorerTopBtn"
-                        onClick={() => handleStartCreate('folder', null)}
+                        className="explorerActionIconBtn"
+                        title="New Folder"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleStartCreate('folder', null);
+                        }}
                     >
                         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                             <line x1="12" y1="11" x2="12" y2="17" />
                             <line x1="9" y1="14" x2="15" y2="14" />
                         </svg>
-                        <span>New Folder</span>
                     </button>
                 </div>
             </div>
 
-            <div className="explorerTreeScrollArea">
-                {/* Root level inline creation */}
-                {isCreating && createParentId === null && (
-                    <form
-                        className="explorerInlineForm rootInline"
-                        onSubmit={handleCreateSubmit}
-                    >
-                        <span className="inlineIcon">
-                            {isCreating === 'folder' ? '📁' : '📄'}
-                        </span>
-                        <input
-                            type="text"
-                            autoFocus
-                            className="explorerInlineInput"
-                            placeholder={isCreating === 'folder' ? 'folder-name' : 'filename.js'}
-                            value={newItemName}
-                            onChange={(e) => setNewItemName(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Escape') setIsCreating(null);
-                            }}
-                            onBlur={() => {
-                                if (!newItemName.trim()) setIsCreating(null);
-                            }}
-                        />
-                    </form>
-                )}
-
-                {renderTree(null, 0)}
-
-                {files.length === 0 && !isCreating && (
-                    <div className="explorerEmptyNotice">
-                        <p>No files in workspace.</p>
-                        <button
-                            type="button"
-                            className="createFirstFileBtn"
-                            onClick={() => handleStartCreate('file', null)}
+            {/* Tree Area */}
+            {!isWorkspaceCollapsed && (
+                <div className="explorerTreeScrollArea">
+                    {/* Root level inline creation */}
+                    {isCreating && createParentId === null && (
+                        <form
+                            className="explorerInlineForm rootInline"
+                            onSubmit={handleCreateSubmit}
                         >
-                            + Create index.js
-                        </button>
-                    </div>
-                )}
-            </div>
+                            <span className="inlineIcon">
+                                {isCreating === 'folder' ? '📁' : '📄'}
+                            </span>
+                            <input
+                                type="text"
+                                autoFocus
+                                className="explorerInlineInput"
+                                placeholder={isCreating === 'folder' ? 'folder-name' : 'filename.js'}
+                                value={newItemName}
+                                onChange={(e) => setNewItemName(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Escape') setIsCreating(null);
+                                }}
+                                onBlur={() => {
+                                    if (!newItemName.trim()) setIsCreating(null);
+                                }}
+                            />
+                        </form>
+                    )}
+
+                    {renderTree(null, 0)}
+
+                    {files.length === 0 && !isCreating && (
+                        <div className="explorerEmptyNotice">
+                            <p>Workspace is empty</p>
+                            <button
+                                type="button"
+                                className="createFirstFileBtn"
+                                onClick={() => handleStartCreate('file', null)}
+                            >
+                                + Create index.js
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

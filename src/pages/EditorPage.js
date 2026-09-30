@@ -19,9 +19,6 @@ import {
 
 const INITIAL_DEFAULT_FILES = [
     { id: 'f_index', name: 'index.js', type: 'file', parentId: null },
-    { id: 'd_src', name: 'src', type: 'folder', parentId: null },
-    { id: 'f_utils', name: 'utils.js', type: 'file', parentId: 'd_src' },
-    { id: 'f_readme', name: 'README.md', type: 'file', parentId: null },
 ];
 
 const EditorPage = () => {
@@ -168,7 +165,6 @@ const EditorPage = () => {
         confirmVariant: 'primary',
         onConfirm: null,
     });
-    const [linkCopied, setLinkCopied] = useState(false);
     const [idCopied, setIdCopied] = useState(false);
 
     const latencySamplesRef = useRef([]);
@@ -654,16 +650,6 @@ const EditorPage = () => {
         }
     }
 
-    async function copyRoomLink() {
-        try {
-            await navigator.clipboard.writeText(window.location.href);
-            setLinkCopied(true);
-            setTimeout(() => setLinkCopied(false), 1500);
-        } catch {
-            toast.error('Could not copy invite link');
-        }
-    }
-
     function handleLeaveRoomRequest() {
         setConfirmModal({
             isOpen: true,
@@ -753,19 +739,12 @@ const EditorPage = () => {
             <div className="ideSidebar">
                 <div className="sidebarHeader">
                     <div className="sidebarTitleArea">
-                        <span className="sidebarCategory">
+                        <h2 className="sidebarMainTitle">
                             {activeSidebarView === 'explorer'
-                                ? 'WORKSPACE'
+                                ? 'EXPLORER'
                                 : activeSidebarView === 'collaborators'
-                                ? 'COLLABORATION'
-                                : 'COMMUNICATION'}
-                        </span>
-                        <h2>
-                            {activeSidebarView === 'explorer'
-                                ? 'Explorer'
-                                : activeSidebarView === 'collaborators'
-                                ? 'Collaborators'
-                                : 'Live Chat'}
+                                ? 'COLLABORATORS'
+                                : 'LIVE CHAT'}
                         </h2>
                     </div>
                 </div>
@@ -829,33 +808,25 @@ const EditorPage = () => {
                     )}
                 </div>
 
-                {/* Sidebar Bottom Room Actions - Compact Icon Row */}
-                <div className="sidebarFooterActions compactRow">
-                    <button className="compactActionBtn" onClick={copyRoomLink}>
-                        {linkCopied ? (
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4aed88" strokeWidth="2.5">
-                                <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                        ) : (
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                            </svg>
-                        )}
-                        <span>{linkCopied ? 'Link Copied!' : 'Share Link'}</span>
-                    </button>
-                    <button className="compactActionBtn" onClick={copyRoomId}>
+                {/* Sidebar Bottom Room Actions - Clean Copy Room ID Pill */}
+                <div className="sidebarFooterActions">
+                    <button className="copyRoomIdPillBtn" onClick={copyRoomId}>
                         {idCopied ? (
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4aed88" strokeWidth="2.5">
-                                <polyline points="20 6 9 17 4 12" />
-                            </svg>
+                            <>
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4aed88" strokeWidth="2.5">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                                <span>Room ID Copied!</span>
+                            </>
                         ) : (
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                            </svg>
+                            <>
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                </svg>
+                                <span>Copy Room ID</span>
+                            </>
                         )}
-                        <span>{idCopied ? 'ID Copied!' : 'Copy ID'}</span>
                     </button>
                 </div>
             </div>
