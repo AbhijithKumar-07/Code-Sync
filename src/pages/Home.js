@@ -6,12 +6,28 @@ import { useNavigate } from 'react-router-dom';
 const Home = () => {
     const navigate = useNavigate();
 
-    const [roomId, setRoomId] = useState('');
-    const [username, setUsername] = useState('');
+    const [roomId, setRoomId] = useState(() => {
+        return sessionStorage.getItem('codesync_draft_room_id') || '';
+    });
+    const [username, setUsername] = useState(() => {
+        return sessionStorage.getItem('codesync_draft_username') || localStorage.getItem('codesync_last_username') || '';
+    });
+
+    const handleRoomIdChange = (val) => {
+        setRoomId(val);
+        sessionStorage.setItem('codesync_draft_room_id', val);
+    };
+
+    const handleUsernameChange = (val) => {
+        setUsername(val);
+        sessionStorage.setItem('codesync_draft_username', val);
+        localStorage.setItem('codesync_last_username', val);
+    };
+
     const createNewRoom = (e) => {
         e.preventDefault();
         const id = uuidV4();
-        setRoomId(id);
+        handleRoomIdChange(id);
         toast.success('Created a New Room');
     };
 
@@ -20,6 +36,10 @@ const Home = () => {
             toast.error('Room ID & Username Is Required');
             return;
         }
+
+        sessionStorage.setItem('codesync_draft_room_id', roomId);
+        sessionStorage.setItem('codesync_draft_username', username);
+        localStorage.setItem('codesync_last_username', username);
 
         // Redirect
         navigate(`/editor/${roomId}`, {
@@ -48,7 +68,7 @@ const Home = () => {
                         type="text"
                         className="inputBox"
                         placeholder="ROOM ID"
-                        onChange={(e) => setRoomId(e.target.value)}
+                        onChange={(e) => handleRoomIdChange(e.target.value)}
                         value={roomId}
                         onKeyUp={handleInputEnter}
                     />
@@ -56,7 +76,7 @@ const Home = () => {
                         type="text"
                         className="inputBox"
                         placeholder="USERNAME"
-                        onChange={(e) => setUsername(e.target.value)}
+                        onChange={(e) => handleUsernameChange(e.target.value)}
                         value={username}
                         onKeyUp={handleInputEnter}
                     />
