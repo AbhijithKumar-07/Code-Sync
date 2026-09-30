@@ -91,11 +91,6 @@ const EditorPage = () => {
             isTyping: false,
         }] : [];
     });
-    const [connectionStatus, setConnectionStatus] = useState('connecting');
-    const [averageLatency, setAverageLatency] = useState(() => {
-        const saved = sessionStorage.getItem('codesync_latency');
-        return saved ? parseFloat(saved) : null;
-    });
     const [activeSidebarView, setActiveSidebarView] = useState(() => {
         return sessionStorage.getItem('codesync_sidebar_view') || 'explorer';
     });
@@ -167,22 +162,9 @@ const EditorPage = () => {
     });
     const [idCopied, setIdCopied] = useState(false);
 
-    const latencySamplesRef = useRef([]);
-    const warmupCountRef = useRef(0);
     const editorInstanceRef = useRef(null);
     const ytextInstanceRef = useRef(null);
     const onRunCodeRef = useRef(null);
-
-    const latencyQuality =
-        averageLatency === null
-            ? 'Measuring'
-            : averageLatency < 100
-            ? 'Optimal'
-            : averageLatency < 180
-            ? 'Good'
-            : averageLatency < 300
-            ? 'Normal'
-            : 'Fair';
 
     const handleParticipantsChange = useCallback((participants) => {
         if (Array.isArray(participants) && participants.length > 0) {
@@ -191,9 +173,7 @@ const EditorPage = () => {
         }
     }, [roomId]);
 
-    const handleConnectionStatusChange = useCallback((status) => {
-        setConnectionStatus(status);
-    }, []);
+    const handleConnectionStatusChange = useCallback(() => {}, []);
 
     const handleEditorReady = useCallback((editor, ytext) => {
         editorInstanceRef.current = editor;
@@ -501,42 +481,12 @@ const EditorPage = () => {
 
     // Socket Connection & Lifecycle
     useEffect(() => {
-        let latencyInterval;
-
         const handleErrors = (e) => {
             console.log('socket error', e);
             toast.error('Connection interrupted. Reconnecting...');
         };
 
-        const handlePongCheck = (sentAt) => {
-            if (typeof sentAt !== 'number') return;
-            const rtt = Math.max(1, Math.round(performance.now() - sentAt));
-            if (warmupCountRef.current < 2) {
-                warmupCountRef.current += 1;
-                return;
-            }
-
-            // Record true full Round-Trip Time (RTT)
-            const samples = latencySamplesRef.current;
-            samples.push(rtt);
-            if (samples.length > 10) samples.shift();
-
-            const average =
-                samples.reduce((sum, sample) => sum + sample, 0) /
-                samples.length;
-            setAverageLatency(average);
-            sessionStorage.setItem('codesync_latency', average.toFixed(1));
-        };
-
-        const measureLatency = () => {
-            if (!socketRef.current || !socketRef.current.connected) return;
-            socketRef.current.emit(ACTIONS.LATENCY_PING, performance.now());
-        };
-
         const init = async () => {
-            latencySamplesRef.current = [];
-            warmupCountRef.current = 0;
-
             const socket = await initSocket();
             socketRef.current = socket;
 
@@ -551,7 +501,6 @@ const EditorPage = () => {
             };
 
             socket.on('connect', joinRoom);
-            socket.on(ACTIONS.LATENCY_PONG, handlePongCheck);
 
             if (socket.connected) {
                 joinRoom();
@@ -616,20 +565,15 @@ const EditorPage = () => {
             });
 
             socket.on(ACTIONS.LANGUAGE_CHANGE, () => {});
-
-            measureLatency();
-            latencyInterval = setInterval(measureLatency, 3000);
         };
 
         init();
 
         return () => {
-            clearInterval(latencyInterval);
             if (socketRef.current) {
                 socketRef.current.off('connect_error', handleErrors);
                 socketRef.current.off('connect_failed', handleErrors);
                 socketRef.current.off('connect');
-                socketRef.current.off(ACTIONS.LATENCY_PONG, handlePongCheck);
                 socketRef.current.off(ACTIONS.JOINED);
                 socketRef.current.off(ACTIONS.DISCONNECTED);
                 socketRef.current.off(ACTIONS.SYNC_CHAT_HISTORY);
@@ -772,48 +716,6 @@ const EditorPage = () => {
                                         isTyping={client.isTyping}
                                     />
                                 ))}
-                            </div>
-
-                            {/* Modern Real-time Collaboration Status Card */}
-                            <div className={`ideHealthCard ${connectionStatus}`}>
-                                <div className="cardHeader">
-                                    <div className="cardHeaderLeft">
-                                        <span className={`healthStatusDot ${connectionStatus === 'connected' ? 'live' : 'reconnecting'}`} />
-                                        <span className="cardTitle">SESSION SYNC</span>
-                                    </div>
-                                    <span className={`syncStatusBadge ${connectionStatus === 'connected' ? 'connected' : 'reconnecting'}`}>
-                                        {connectionStatus === 'connected' ? 'LIVE' : 'RECONNECTING'}
-                                    </span>
-                                </div>
-
-                                <div className="syncLatencyRow">
-                                    <div className="latencyLabelGroup">
-                                        <span className="latencyMetricTitle">Network RTT</span>
-                                        <span className="latencySubtitle">Full round-trip time</span>
-                                    </div>
-                                    <div className="latencyValueBox">
-                                        <span className="latencyNumber">
-                                            {averageLatency === null ? '--' : Math.round(averageLatency)}
-                                        </span>
-                                        <span className="latencyUnit">ms</span>
-                                    </div>
-                                </div>
-
-                                <div className="latencyBar">
-                                    <div className={`latencyBarFill ${latencyQuality.toLowerCase()}`} />
-                                </div>
-
-                                <div className="healthFooter">
-                                    <div className="footerSyncStatus">
-                                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                        <span>Real-time Sync Active</span>
-                                    </div>
-                                    <span className={`footerQualityPill ${latencyQuality.toLowerCase()}`}>
-                                        {latencyQuality}
-                                    </span>
-                                </div>
                             </div>
                         </div>
                     ) : (
