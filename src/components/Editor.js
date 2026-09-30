@@ -47,6 +47,7 @@ const Editor = ({
     onConnectionStatusChange,
     onEditorReady,
     onRunCodeRef,
+    onNewFile,
 }) => {
     const editorRef = useRef(null);
     const providerRef = useRef(null);
@@ -74,11 +75,20 @@ const Editor = ({
 
     // Handle dynamic file switching
     useEffect(() => {
-        if (!ydocRef.current || !editorRef.current || !providerRef.current || !activeFileId) return;
+        if (!ydocRef.current || !editorRef.current || !providerRef.current) return;
 
         // Destroy previous file binding
         if (bindingRef.current) {
             bindingRef.current.destroy();
+            bindingRef.current = null;
+        }
+
+        if (!activeFileId) {
+            editorRef.current.setValue('');
+            if (onEditorReady) {
+                onEditorReady(editorRef.current, null, ydocRef.current);
+            }
+            return;
         }
 
         const ytext = ydocRef.current.getText('file_' + activeFileId);
@@ -127,18 +137,23 @@ const Editor = ({
             }
         );
 
-        const initialFileId = activeFileId || 'f_index';
-        const ytext = ydoc.getText('file_' + initialFileId);
+        if (activeFileId) {
+            const ytext = ydoc.getText('file_' + activeFileId);
+            const binding = new CodemirrorBinding(
+                ytext,
+                editorRef.current,
+                provider.awareness
+            );
+            bindingRef.current = binding;
 
-        const binding = new CodemirrorBinding(
-            ytext,
-            editorRef.current,
-            provider.awareness
-        );
-        bindingRef.current = binding;
-
-        if (onEditorReady) {
-            onEditorReady(editorRef.current, ytext, ydoc);
+            if (onEditorReady) {
+                onEditorReady(editorRef.current, ytext, ydoc);
+            }
+        } else {
+            editorRef.current.setValue('');
+            if (onEditorReady) {
+                onEditorReady(editorRef.current, null, ydoc);
+            }
         }
 
         provider.awareness.setLocalStateField('user', {
@@ -227,7 +242,49 @@ const Editor = ({
 
     return (
         <div className="editorInnerWrapper" style={{ fontSize: fontSize || '16px' }}>
-            <textarea id="realtimeEditor"></textarea>
+            <div className={`editorCodeAreaWrapper ${activeFileId ? 'active' : 'hidden'}`}>
+                <textarea id="realtimeEditor"></textarea>
+            </div>
+            {!activeFileId && (
+                <div className="emptyEditorState">
+                    <div className="emptyEditorGlowBackdrop" />
+                    <div className="emptyEditorIconCard">
+                        <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="emptyStateFolderIcon">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="9" y1="13" x2="15" y2="13" />
+                            <line x1="9" y1="17" x2="13" y2="17" />
+                        </svg>
+                    </div>
+                    <h3 className="emptyEditorTitle">No Open Files</h3>
+                    <p className="emptyEditorSubtitle">
+                        Create a new file or select an existing file from the workspace explorer to start coding.
+                    </p>
+                    {onNewFile && (
+                        <button
+                            type="button"
+                            className="emptyEditorNewFileBtn"
+                            onClick={() => onNewFile()}
+                        >
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                            <span>New File</span>
+                        </button>
+                    )}
+                    <div className="emptyEditorShortcutsRow">
+                        <div className="shortcutPill">
+                            <span className="shortcutKeys"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span>
+                            <span className="shortcutDesc">Run Code</span>
+                        </div>
+                        <div className="shortcutPill">
+                            <span className="shortcutIndicatorDot" />
+                            <span className="shortcutDesc">Real-Time Sync Active</span>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

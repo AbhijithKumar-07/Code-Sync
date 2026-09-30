@@ -1895,6 +1895,158 @@ body {
     flex-direction: column;
     overflow: hidden;
     background: transparent;
+    position: relative;
+}
+
+.editorCodeAreaWrapper {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.editorCodeAreaWrapper.hidden {
+    display: none !important;
+}
+
+/* Modern Empty Editor State */
+.emptyEditorState {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    text-align: center;
+    position: relative;
+    user-select: none;
+    background: radial-gradient(circle at 50% 40%, rgba(30, 41, 59, 0.4) 0%, rgba(11, 15, 25, 0.95) 75%);
+}
+
+.emptyEditorGlowBackdrop {
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(74, 237, 136, 0.08) 0%, rgba(59, 130, 246, 0.05) 50%, transparent 70%);
+    pointer-events: none;
+    filter: blur(40px);
+}
+
+.emptyEditorIconCard {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    color: #4aed88;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    z-index: 1;
+}
+
+.emptyEditorIconCard:hover {
+    transform: translateY(-2px) scale(1.04);
+    border-color: rgba(74, 237, 136, 0.35);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 24px rgba(74, 237, 136, 0.15);
+}
+
+.emptyStateFolderIcon {
+    filter: drop-shadow(0 0 8px rgba(74, 237, 136, 0.3));
+}
+
+.emptyEditorTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.01em;
+    position: relative;
+    z-index: 1;
+}
+
+.emptyEditorSubtitle {
+    font-size: 13px;
+    color: #64748b;
+    max-width: 360px;
+    line-height: 1.55;
+    margin: 0 0 24px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.emptyEditorNewFileBtn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #042f2e;
+    border: none;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 20px;
+    border-radius: 9999px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    z-index: 1;
+}
+
+.emptyEditorNewFileBtn:hover {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    color: #022c22;
+}
+
+.emptyEditorNewFileBtn:active {
+    transform: translateY(0);
+}
+
+.emptyEditorShortcutsRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 32px;
+    position: relative;
+    z-index: 1;
+}
+
+.shortcutPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.shortcutKeys kbd {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    padding: 1px 4px;
+    font-size: 10px;
+    font-family: var(--font-code);
+    color: #cbd5e1;
+}
+
+.shortcutIndicatorDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #34d399;
+    box-shadow: 0 0 6px #34d399;
 }
 
 #realtimeEditor {

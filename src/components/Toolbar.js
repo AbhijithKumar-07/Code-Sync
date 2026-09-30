@@ -295,6 +295,7 @@ const Toolbar = ({
                         className="actionBtn iconOnly"
                         onClick={onLoadStarter}
                         title="Load Starter Template"
+                        disabled={!activeFileId}
                     >
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -308,6 +309,7 @@ const Toolbar = ({
                         type="button"
                         className="actionBtn iconOnly"
                         onClick={handleCopy}
+                        disabled={!activeFileId}
                     >
                         {copiedRecently ? (
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4aed88" strokeWidth="2.5">
@@ -325,6 +327,7 @@ const Toolbar = ({
                         type="button"
                         className="actionBtn iconOnly"
                         onClick={onDownloadCode}
+                        disabled={!activeFileId}
                     >
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -337,6 +340,7 @@ const Toolbar = ({
                         type="button"
                         className="actionBtn iconOnly dangerHover"
                         onClick={onClearCode}
+                        disabled={!activeFileId}
                     >
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
                             <polyline points="3 6 5 6 21 6" />
@@ -360,12 +364,12 @@ const Toolbar = ({
 
                 <div className="actionDivider" />
 
-                {/* 3. Run Code Button without shortcut hint or hover animation */}
+                {/* 3. Run Code Button */}
                 <button
                     type="button"
                     className={`actionBtn runBtn ${isRunning ? 'running' : ''}`}
                     onClick={onRunCode}
-                    disabled={isRunning}
+                    disabled={isRunning || !activeFileId}
                 >
                     {isRunning ? (
                         <>

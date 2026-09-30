@@ -384,18 +384,10 @@ const EditorPage = () => {
     const handleCloseFile = (fileIdToClose) => {
         setOpenFileIds((prev) => {
             const next = prev.filter((id) => id !== fileIdToClose);
-            if (next.length === 0) {
-                const firstFile = files.find((f) => f.type === 'file');
-                if (firstFile) {
-                    setActiveFileId(firstFile.id);
-                    return [firstFile.id];
-                }
-                return [];
-            }
             if (activeFileId === fileIdToClose) {
                 const closedIndex = prev.indexOf(fileIdToClose);
                 const newActiveIndex = closedIndex > 0 ? closedIndex - 1 : 0;
-                setActiveFileId(next[newActiveIndex] || next[0]);
+                setActiveFileId(next[newActiveIndex] || null);
             }
             return next;
         });
@@ -500,8 +492,9 @@ const EditorPage = () => {
                 setOpenFileIds(remainingOpen);
 
                 if (idsToDelete.has(activeFileId)) {
-                    const nextFile = remainingOpen[0] || remainingFiles.find((f) => f.type === 'file');
-                    setActiveFileId(nextFile ? nextFile.id : null);
+                    const nextFileId = remainingOpen.find((id) => remainingFiles.some((f) => f.id === id && f.type === 'file'))
+                        || remainingFiles.find((f) => f.type === 'file')?.id;
+                    setActiveFileId(nextFileId || null);
                 }
 
                 setConfirmModal({ isOpen: false });
@@ -972,6 +965,7 @@ const EditorPage = () => {
                         onConnectionStatusChange={handleConnectionStatusChange}
                         onEditorReady={handleEditorReady}
                         onRunCodeRef={onRunCodeRef}
+                        onNewFile={handleNewFileTab}
                     />
 
                     <Console
