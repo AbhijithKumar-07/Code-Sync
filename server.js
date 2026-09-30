@@ -101,6 +101,25 @@ const WANDBOX_COMPILER_MAP = {
 // --------------------------------------------------------
 // 1. Judge0 Execution Handler (Production Sandboxing)
 // --------------------------------------------------------
+const CLEAN_LANG_MAP = {
+    javascript: 'JavaScript',
+    js: 'JavaScript',
+    python: 'Python 3',
+    py: 'Python 3',
+    cpp: 'C++',
+    'c++': 'C++',
+    c: 'C',
+    java: 'Java',
+    go: 'Go',
+    rust: 'Rust',
+    typescript: 'TypeScript',
+    ts: 'TypeScript',
+    php: 'PHP',
+    ruby: 'Ruby',
+    csharp: 'C#',
+    cs: 'C#',
+};
+
 async function executeViaJudge0(langKey, code, stdin = '') {
     const judge0Url = process.env.JUDGE0_API_URL || 'https://ce.judge0.com';
     const apiKey = process.env.JUDGE0_API_KEY;
@@ -150,8 +169,8 @@ async function executeViaJudge0(langKey, code, stdin = '') {
             stderr,
             code: isSuccess ? 0 : 1,
             output: stdout || stderr || '(No output produced)',
-            compiler: `Sandbox Engine (${data.status?.description || 'Executed'})`,
-            executionTime: Math.round(parseFloat(data.time || 0) * 1000) || elapsed,
+            compiler: CLEAN_LANG_MAP[langKey] || 'Engine',
+            executionTime: elapsed,
         };
     } catch (err) {
         return null;
@@ -198,7 +217,7 @@ async function executeViaPiston(langKey, code, stdin = '') {
             stderr: run.stderr || '',
             code: run.code === 0 ? 0 : 1,
             output: run.output || run.stdout || run.stderr || '(No output produced)',
-            compiler: `Piston Sandbox (${data.language} ${data.version || ''})`.trim(),
+            compiler: CLEAN_LANG_MAP[langKey] || 'Piston',
             executionTime: elapsed,
         };
     } catch (err) {
@@ -252,7 +271,7 @@ function executeLocalJS(code) {
             stderr: '',
             code: 0,
             output: logs.join('\n') || '(Execution finished with no output)',
-            compiler: 'V8 Sandbox (Instant)',
+            compiler: 'JavaScript',
             executionTime: elapsed,
         };
     } catch (err) {
@@ -261,7 +280,7 @@ function executeLocalJS(code) {
             stderr: err.stack || err.message,
             code: 1,
             output: err.message,
-            compiler: 'V8 Sandbox (Instant)',
+            compiler: 'JavaScript',
             executionTime: Math.max(Date.now() - startTime, 1),
         };
     }
@@ -300,7 +319,7 @@ function executeLocalPython(code, stdin = '') {
                     stderr,
                     code: exitCode === 0 ? 0 : 1,
                     output: stdout || stderr || '(No output produced)',
-                    compiler: 'Python 3 (Docker Runner)',
+                    compiler: 'Python 3',
                     executionTime: elapsed,
                 });
             });
@@ -330,7 +349,7 @@ function executeLocalCpp(code, stdin = '') {
             return resolve(null);
         }
 
-        exec(`g++ -O0 "${srcFile}" -o "${exeFile}"`, { timeout: 4000 }, (compileErr, compStdout, compStderr) => {
+        exec(`g++ -O0 -pipe "${srcFile}" -o "${exeFile}"`, { timeout: 4000 }, (compileErr, compStdout, compStderr) => {
             try { fs.unlinkSync(srcFile); } catch {}
             if (compileErr) {
                 const msg = (compileErr.message || '').toLowerCase();
@@ -343,7 +362,7 @@ function executeLocalCpp(code, stdin = '') {
                     stderr: compStderr || compileErr.message,
                     code: 1,
                     output: compStderr || compStdout || compileErr.message,
-                    compiler: 'GCC C++ (Docker Runner)',
+                    compiler: 'C++',
                     executionTime: elapsed,
                 });
             }
@@ -356,7 +375,7 @@ function executeLocalCpp(code, stdin = '') {
                     stderr: runStderr || (runErr ? runErr.message : ''),
                     code: runErr ? 1 : 0,
                     output: runStdout || runStderr || '(No output produced)',
-                    compiler: 'GCC C++ (Docker Runner)',
+                    compiler: 'C++',
                     executionTime: elapsed,
                 });
             });
@@ -379,7 +398,7 @@ function executeLocalC(code, stdin = '') {
         const exeFile = path.join(tempDir, `code_${timestamp}.exe`);
         try { fs.writeFileSync(srcFile, code); } catch { return resolve(null); }
 
-        exec(`gcc -O0 "${srcFile}" -o "${exeFile}"`, { timeout: 4000 }, (compileErr, compStdout, compStderr) => {
+        exec(`gcc -O0 -pipe "${srcFile}" -o "${exeFile}"`, { timeout: 4000 }, (compileErr, compStdout, compStderr) => {
             try { fs.unlinkSync(srcFile); } catch {}
             if (compileErr) {
                 const msg = (compileErr.message || '').toLowerCase();
@@ -392,7 +411,7 @@ function executeLocalC(code, stdin = '') {
                     stderr: compStderr || compileErr.message,
                     code: 1,
                     output: compStderr || compStdout || compileErr.message,
-                    compiler: 'GCC C (Docker Runner)',
+                    compiler: 'C',
                     executionTime: elapsed,
                 });
             }
@@ -405,7 +424,7 @@ function executeLocalC(code, stdin = '') {
                     stderr: runStderr || (runErr ? runErr.message : ''),
                     code: runErr ? 1 : 0,
                     output: runStdout || runStderr || '(No output produced)',
-                    compiler: 'GCC C (Docker Runner)',
+                    compiler: 'C',
                     executionTime: elapsed,
                 });
             });
@@ -444,7 +463,7 @@ function executeLocalJava(code, stdin = '') {
                         stderr: compStderr || compileErr.message,
                         code: 1,
                         output: compStderr || compStdout || compileErr.message,
-                        compiler: 'OpenJDK 17 (Docker Runner)',
+                        compiler: 'Java',
                         executionTime: elapsed,
                     });
                 }
@@ -457,7 +476,7 @@ function executeLocalJava(code, stdin = '') {
                         stderr: runStderr || (runErr ? runErr.message : ''),
                         code: runErr ? 1 : 0,
                         output: runStdout || runStderr || '(No output produced)',
-                        compiler: 'OpenJDK 17 (Docker Runner)',
+                        compiler: 'Java',
                         executionTime: elapsed,
                     });
                 });
@@ -493,7 +512,7 @@ function executeLocalGo(code, stdin = '') {
                 stderr: runStderr || (runErr ? runErr.message : ''),
                 code: runErr ? 1 : 0,
                 output: runStdout || runStderr || '(No output produced)',
-                compiler: 'Go (Docker Runner)',
+                compiler: 'Go',
                 executionTime: elapsed,
             });
         });
@@ -512,7 +531,7 @@ function executeLocalRust(code, stdin = '') {
         const exeFile = path.join(tempDir, `code_${timestamp}.exe`);
         try { fs.writeFileSync(srcFile, code); } catch { return resolve(null); }
 
-        exec(`rustc -C opt-level=0 "${srcFile}" -o "${exeFile}"`, { timeout: 4000 }, (compileErr, compStdout, compStderr) => {
+        exec(`rustc -C opt-level=0 -C codegen-units=16 "${srcFile}" -o "${exeFile}"`, { timeout: 4000 }, (compileErr, compStdout, compStderr) => {
             try { fs.unlinkSync(srcFile); } catch {}
             if (compileErr) {
                 const msg = (compileErr.message || '').toLowerCase();
@@ -525,7 +544,7 @@ function executeLocalRust(code, stdin = '') {
                     stderr: compStderr || compileErr.message,
                     code: 1,
                     output: compStderr || compStdout || compileErr.message,
-                    compiler: 'Rust (Docker Runner)',
+                    compiler: 'Rust',
                     executionTime: elapsed,
                 });
             }
@@ -538,7 +557,7 @@ function executeLocalRust(code, stdin = '') {
                     stderr: runStderr || (runErr ? runErr.message : ''),
                     code: runErr ? 1 : 0,
                     output: runStdout || runStderr || '(No output produced)',
-                    compiler: 'Rust (Docker Runner)',
+                    compiler: 'Rust',
                     executionTime: elapsed,
                 });
             });
@@ -571,7 +590,7 @@ function executeLocalPhp(code, stdin = '') {
                 stderr: runStderr || (runErr ? runErr.message : ''),
                 code: runErr ? 1 : 0,
                 output: runStdout || runStderr || '(No output produced)',
-                compiler: 'PHP (Docker Runner)',
+                compiler: 'PHP',
                 executionTime: elapsed,
             });
         });
@@ -603,7 +622,7 @@ function executeLocalRuby(code, stdin = '') {
                 stderr: runStderr || (runErr ? runErr.message : ''),
                 code: runErr ? 1 : 0,
                 output: runStdout || runStderr || '(No output produced)',
-                compiler: 'Ruby (Docker Runner)',
+                compiler: 'Ruby',
                 executionTime: elapsed,
             });
         });
@@ -637,7 +656,7 @@ async function executeViaWandbox(langKey, code, stdin = '') {
         code: isSuccess ? 0 : 1,
         signal: data.signal || null,
         output: stdout || stderr || '(No output produced)',
-        compiler: `Wandbox (${compiler})`,
+        compiler: CLEAN_LANG_MAP[langKey] || 'Compiler',
         executionTime: elapsed,
     };
 }
@@ -658,18 +677,20 @@ app.post('/api/execute', async (req, res) => {
             return res.json({ run: jsResult, compiler: jsResult.compiler, executionTime: jsResult.executionTime });
         }
 
-        // Step 2: Native Docker Container Compilers & Runtimes (15-60ms zero-latency)
+        // Step 2: High-Speed Fast-Paths for Heavy Compiled Languages (C++, Rust) via Pre-Warmed Engine
+        if (langKey === 'cpp' || langKey === 'c++' || langKey === 'rust') {
+            const fastCloudResult = await executeViaJudge0(langKey, code, stdin);
+            if (fastCloudResult) {
+                return res.json({ run: fastCloudResult, compiler: fastCloudResult.compiler, executionTime: fastCloudResult.executionTime });
+            }
+        }
+
+        // Step 3: Fast Native In-Container Runtimes (Python, C, Java, Go, PHP, Ruby)
         if (allowLocal) {
             if (langKey === 'python' || langKey === 'py') {
                 const pyResult = await executeLocalPython(code, stdin);
                 if (pyResult) {
                     return res.json({ run: pyResult, compiler: pyResult.compiler, executionTime: pyResult.executionTime });
-                }
-            }
-            if (langKey === 'cpp' || langKey === 'c++') {
-                const cppResult = await executeLocalCpp(code, stdin);
-                if (cppResult) {
-                    return res.json({ run: cppResult, compiler: cppResult.compiler, executionTime: cppResult.executionTime });
                 }
             }
             if (langKey === 'c') {
@@ -688,6 +709,12 @@ app.post('/api/execute', async (req, res) => {
                 const goResult = await executeLocalGo(code, stdin);
                 if (goResult) {
                     return res.json({ run: goResult, compiler: goResult.compiler, executionTime: goResult.executionTime });
+                }
+            }
+            if (langKey === 'cpp' || langKey === 'c++') {
+                const cppResult = await executeLocalCpp(code, stdin);
+                if (cppResult) {
+                    return res.json({ run: cppResult, compiler: cppResult.compiler, executionTime: cppResult.executionTime });
                 }
             }
             if (langKey === 'rust') {

@@ -69,7 +69,7 @@ const Console = ({
 
                     {compiler && !isRunning && (
                         <span className="terminalCompilerTag">
-                            {compiler}
+                            {compiler.replace(/\s*\([^)]*\)/g, '').trim() || compiler}
                         </span>
                     )}
 
