@@ -30,18 +30,23 @@ const Home = () => {
         e.preventDefault();
         if (roomId && roomId.trim().length > 0) {
             toast('Room ID is already generated! Enter username to join.', {
+                id: 'room-gen-toast',
                 icon: '🔑',
             });
             return;
         }
         const id = uuidV4();
         handleRoomIdChange(id);
-        toast.success('Generated New Room ID');
+        toast.success('Generated New Room ID', {
+            id: 'room-gen-toast',
+        });
     };
 
     const joinRoom = () => {
         if (!roomId || !username) {
-            toast.error('Room ID & Username Is Required');
+            toast.error('Room ID & Username are required', {
+                id: 'room-join-toast',
+            });
             return;
         }
 
@@ -75,7 +80,6 @@ const Home = () => {
                 </div>
 
                 <div className="homeFormHeader">
-                    <h3 className="mainLabel">Paste Invitation Room ID</h3>
                     <p className="mainSubLabel">Enter a room ID and your name to join live collaboration</p>
                 </div>
 
@@ -160,8 +164,9 @@ const Home = () => {
                             className="createNewRoomBtn"
                         >
                             <span>Create New Room</span>
-                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="9 18 15 12 9 6" />
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
                             </svg>
                         </button>
                     </div>
