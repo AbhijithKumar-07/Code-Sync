@@ -251,27 +251,74 @@ const EditorPage = () => {
                 }
             }
 
-            // 2. Multi-Tier Production Backend Cascade (Judge0 / Piston / Local Sandbox / Wandbox)
+            // 2. Multi-Tier Production Backend Cascade (Render Backend with fallback to Piston)
             if (!runResult) {
-                const response = await fetch(`${SOCKET_URL}/api/execute`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        language: selectedLanguage.id,
-                        code: code,
-                        stdin: stdin,
-                    }),
-                });
+                try {
+                    const response = await fetch(`${SOCKET_URL}/api/execute`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            language: selectedLanguage.id,
+                            code: code,
+                            stdin: stdin,
+                        }),
+                    });
 
-                const data = await response.json();
-                const elapsed = Math.round(performance.now() - startTime);
-                execTime = data?.executionTime || elapsed;
-                compiler = data?.compiler || selectedLanguage.name;
+                    if (response.ok) {
+                        const data = await response.json();
+                        const elapsed = Math.round(performance.now() - startTime);
+                        execTime = data?.executionTime || elapsed;
+                        compiler = data?.compiler || selectedLanguage.name;
 
-                if (data?.run) {
-                    runResult = data.run;
-                } else if (data?.message) {
-                    runResult = { stdout: '', stderr: data.message, code: 1, output: data.message };
+                        if (data?.run) {
+                            runResult = data.run;
+                        } else if (data?.message) {
+                            runResult = { stdout: '', stderr: data.message, code: 1, output: data.message };
+                        }
+                    }
+                } catch (backendFetchErr) {
+                    console.warn('Backend execution API unreachable, attempting direct fallback engine:', backendFetchErr);
+                }
+            }
+
+            // 3. Resilient Public Fallback (Direct Piston Engine)
+            if (!runResult) {
+                try {
+                    const pistonLangMap = {
+                        javascript: 'javascript',
+                        js: 'javascript',
+                        python: 'python3',
+                        py: 'python3',
+                        cpp: 'cpp',
+                        'c++': 'cpp',
+                        c: 'c',
+                        java: 'java',
+                        go: 'go',
+                        rust: 'rust',
+                    };
+                    const pistonLang = pistonLangMap[langKey] || langKey || 'python3';
+                    const pistonRes = await fetch('https://emkc.org/api/v2/piston/execute', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            language: pistonLang,
+                            version: '*',
+                            files: [{ content: code }],
+                            stdin: stdin,
+                        }),
+                    });
+
+                    if (pistonRes.ok) {
+                        const data = await pistonRes.json();
+                        const elapsed = Math.round(performance.now() - startTime);
+                        execTime = elapsed;
+                        compiler = `${data.language} ${data.version || ''}`.trim();
+                        if (data?.run) {
+                            runResult = data.run;
+                        }
+                    }
+                } catch (pistonErr) {
+                    console.error('Direct fallback execution error:', pistonErr);
                 }
             }
 
