@@ -271,12 +271,12 @@ function executeLocalPython(code, stdin = '') {
     return new Promise((resolve) => {
         const startTime = Date.now();
         const pythonBin = process.platform === 'win32' ? 'python' : 'python3';
-        
+
         function trySpawn(bin) {
             let proc;
             try {
                 proc = spawn(bin, ['-u', '-c', code], {
-                    timeout: 4500,
+                    timeout: 5000,
                     env: { PYTHONUNBUFFERED: '1' },
                 });
             } catch (e) {
@@ -300,13 +300,13 @@ function executeLocalPython(code, stdin = '') {
                     stderr,
                     code: exitCode === 0 ? 0 : 1,
                     output: stdout || stderr || '(No output produced)',
-                    compiler: 'Python 3 (Instant Isolated)',
+                    compiler: 'Python 3 (Docker Runner)',
                     executionTime: elapsed,
                 });
             });
-            proc.on('error', () => {
-                if (bin === 'python3') {
-                    trySpawn('python'); // Try fallback to python
+            proc.on('error', (err) => {
+                if (bin === 'python3' && process.platform === 'win32') {
+                    trySpawn('python');
                 } else {
                     resolve(null);
                 }
@@ -329,12 +329,26 @@ function executeLocalCpp(code, stdin = '') {
         } catch (e) {
             return resolve(null);
         }
-        exec(`g++ "${srcFile}" -o "${exeFile}"`, { timeout: 4000 }, (compileErr, compStdout, compStderr) => {
+
+        exec(`g++ -O2 "${srcFile}" -o "${exeFile}"`, { timeout: 6000 }, (compileErr, compStdout, compStderr) => {
             try { fs.unlinkSync(srcFile); } catch {}
             if (compileErr) {
-                return resolve(null); // Smooth fallback to cloud/Judge0/Wandbox
+                const msg = (compileErr.message || '').toLowerCase();
+                if (compileErr.code === 127 || msg.includes('not found') || msg.includes('not recognized')) {
+                    return resolve(null); // Missing g++ binary on host
+                }
+                const elapsed = Math.max(Date.now() - startTime, 1);
+                return resolve({
+                    stdout: compStdout || '',
+                    stderr: compStderr || compileErr.message,
+                    code: 1,
+                    output: compStderr || compStdout || compileErr.message,
+                    compiler: 'GCC C++ (Docker Runner)',
+                    executionTime: elapsed,
+                });
             }
-            const runProc = execFile(exeFile, { timeout: 3500 }, (runErr, runStdout, runStderr) => {
+
+            const runProc = execFile(exeFile, { timeout: 4000 }, (runErr, runStdout, runStderr) => {
                 try { fs.unlinkSync(exeFile); } catch {}
                 const elapsed = Math.max(Date.now() - startTime, 1);
                 resolve({
@@ -342,7 +356,7 @@ function executeLocalCpp(code, stdin = '') {
                     stderr: runStderr || (runErr ? runErr.message : ''),
                     code: runErr ? 1 : 0,
                     output: runStdout || runStderr || '(No output produced)',
-                    compiler: 'GCC Native',
+                    compiler: 'GCC C++ (Docker Runner)',
                     executionTime: elapsed,
                 });
             });
@@ -364,10 +378,26 @@ function executeLocalC(code, stdin = '') {
         const srcFile = path.join(tempDir, `code_${timestamp}.c`);
         const exeFile = path.join(tempDir, `code_${timestamp}.exe`);
         try { fs.writeFileSync(srcFile, code); } catch { return resolve(null); }
-        exec(`gcc "${srcFile}" -o "${exeFile}"`, { timeout: 4000 }, (compileErr) => {
+
+        exec(`gcc -O2 "${srcFile}" -o "${exeFile}"`, { timeout: 6000 }, (compileErr, compStdout, compStderr) => {
             try { fs.unlinkSync(srcFile); } catch {}
-            if (compileErr) return resolve(null);
-            const runProc = execFile(exeFile, { timeout: 3500 }, (runErr, runStdout, runStderr) => {
+            if (compileErr) {
+                const msg = (compileErr.message || '').toLowerCase();
+                if (compileErr.code === 127 || msg.includes('not found') || msg.includes('not recognized')) {
+                    return resolve(null);
+                }
+                const elapsed = Math.max(Date.now() - startTime, 1);
+                return resolve({
+                    stdout: compStdout || '',
+                    stderr: compStderr || compileErr.message,
+                    code: 1,
+                    output: compStderr || compStdout || compileErr.message,
+                    compiler: 'GCC C (Docker Runner)',
+                    executionTime: elapsed,
+                });
+            }
+
+            const runProc = execFile(exeFile, { timeout: 4000 }, (runErr, runStdout, runStderr) => {
                 try { fs.unlinkSync(exeFile); } catch {}
                 const elapsed = Math.max(Date.now() - startTime, 1);
                 resolve({
@@ -375,7 +405,7 @@ function executeLocalC(code, stdin = '') {
                     stderr: runStderr || (runErr ? runErr.message : ''),
                     code: runErr ? 1 : 0,
                     output: runStdout || runStderr || '(No output produced)',
-                    compiler: 'GCC Native (C)',
+                    compiler: 'GCC C (Docker Runner)',
                     executionTime: elapsed,
                 });
             });
@@ -394,17 +424,31 @@ function executeLocalJava(code, stdin = '') {
         const javaDir = path.join(tempDir, `java_${timestamp}`);
         try {
             fs.mkdirSync(javaDir, { recursive: true });
-            const match = code.match(/public\s+class\s+([A-Za-z0-9_]+)/);
-            const className = match ? match[1] : 'Main';
+            const publicMatch = code.match(/public\s+class\s+([A-Za-z0-9_]+)/);
+            const classMatch = code.match(/class\s+([A-Za-z0-9_]+)/);
+            const className = (publicMatch && publicMatch[1]) || (classMatch && classMatch[1]) || 'Main';
             const srcFile = path.join(javaDir, `${className}.java`);
             fs.writeFileSync(srcFile, code);
 
-            exec(`javac "${srcFile}"`, { timeout: 5000, cwd: javaDir }, (compileErr) => {
+            exec(`javac "${srcFile}"`, { timeout: 6000, cwd: javaDir }, (compileErr, compStdout, compStderr) => {
                 if (compileErr) {
                     try { fs.rmSync(javaDir, { recursive: true, force: true }); } catch {}
-                    return resolve(null);
+                    const msg = (compileErr.message || '').toLowerCase();
+                    if (compileErr.code === 127 || msg.includes('not found') || msg.includes('not recognized')) {
+                        return resolve(null);
+                    }
+                    const elapsed = Math.max(Date.now() - startTime, 1);
+                    return resolve({
+                        stdout: compStdout || '',
+                        stderr: compStderr || compileErr.message,
+                        code: 1,
+                        output: compStderr || compStdout || compileErr.message,
+                        compiler: 'OpenJDK 17 (Docker Runner)',
+                        executionTime: elapsed,
+                    });
                 }
-                const runProc = exec(`java -cp "${javaDir}" ${className}`, { timeout: 4000, cwd: javaDir }, (runErr, runStdout, runStderr) => {
+
+                const runProc = exec(`java -cp "${javaDir}" ${className}`, { timeout: 5000, cwd: javaDir }, (runErr, runStdout, runStderr) => {
                     try { fs.rmSync(javaDir, { recursive: true, force: true }); } catch {}
                     const elapsed = Math.max(Date.now() - startTime, 1);
                     resolve({
@@ -412,7 +456,7 @@ function executeLocalJava(code, stdin = '') {
                         stderr: runStderr || (runErr ? runErr.message : ''),
                         code: runErr ? 1 : 0,
                         output: runStdout || runStderr || '(No output produced)',
-                        compiler: 'OpenJDK Native (Java)',
+                        compiler: 'OpenJDK 17 (Docker Runner)',
                         executionTime: elapsed,
                     });
                 });
@@ -433,16 +477,22 @@ function executeLocalGo(code, stdin = '') {
         const timestamp = Date.now() + Math.random().toString(36).substr(2, 4);
         const srcFile = path.join(tempDir, `main_${timestamp}.go`);
         try { fs.writeFileSync(srcFile, code); } catch { return resolve(null); }
-        const runProc = exec(`go run "${srcFile}"`, { timeout: 5000 }, (runErr, runStdout, runStderr) => {
+
+        const runProc = exec(`go run "${srcFile}"`, { timeout: 6000 }, (runErr, runStdout, runStderr) => {
             try { fs.unlinkSync(srcFile); } catch {}
-            if (runErr && !runStdout && !runStderr) return resolve(null);
+            if (runErr) {
+                const msg = (runErr.message || '').toLowerCase();
+                if (runErr.code === 127 || msg.includes('not found') || msg.includes('not recognized')) {
+                    return resolve(null);
+                }
+            }
             const elapsed = Math.max(Date.now() - startTime, 1);
             resolve({
                 stdout: runStdout,
                 stderr: runStderr || (runErr ? runErr.message : ''),
                 code: runErr ? 1 : 0,
                 output: runStdout || runStderr || '(No output produced)',
-                compiler: 'Go Native',
+                compiler: 'Go (Docker Runner)',
                 executionTime: elapsed,
             });
         });
@@ -460,10 +510,26 @@ function executeLocalRust(code, stdin = '') {
         const srcFile = path.join(tempDir, `code_${timestamp}.rs`);
         const exeFile = path.join(tempDir, `code_${timestamp}.exe`);
         try { fs.writeFileSync(srcFile, code); } catch { return resolve(null); }
-        exec(`rustc "${srcFile}" -o "${exeFile}"`, { timeout: 5000 }, (compileErr) => {
+
+        exec(`rustc "${srcFile}" -o "${exeFile}"`, { timeout: 6000 }, (compileErr, compStdout, compStderr) => {
             try { fs.unlinkSync(srcFile); } catch {}
-            if (compileErr) return resolve(null);
-            const runProc = execFile(exeFile, { timeout: 3500 }, (runErr, runStdout, runStderr) => {
+            if (compileErr) {
+                const msg = (compileErr.message || '').toLowerCase();
+                if (compileErr.code === 127 || msg.includes('not found') || msg.includes('not recognized')) {
+                    return resolve(null);
+                }
+                const elapsed = Math.max(Date.now() - startTime, 1);
+                return resolve({
+                    stdout: compStdout || '',
+                    stderr: compStderr || compileErr.message,
+                    code: 1,
+                    output: compStderr || compStdout || compileErr.message,
+                    compiler: 'Rust (Docker Runner)',
+                    executionTime: elapsed,
+                });
+            }
+
+            const runProc = execFile(exeFile, { timeout: 4000 }, (runErr, runStdout, runStderr) => {
                 try { fs.unlinkSync(exeFile); } catch {}
                 const elapsed = Math.max(Date.now() - startTime, 1);
                 resolve({
@@ -471,7 +537,7 @@ function executeLocalRust(code, stdin = '') {
                     stderr: runStderr || (runErr ? runErr.message : ''),
                     code: runErr ? 1 : 0,
                     output: runStdout || runStderr || '(No output produced)',
-                    compiler: 'Rust Native',
+                    compiler: 'Rust (Docker Runner)',
                     executionTime: elapsed,
                 });
             });
@@ -489,16 +555,22 @@ function executeLocalPhp(code, stdin = '') {
         const timestamp = Date.now() + Math.random().toString(36).substr(2, 4);
         const srcFile = path.join(tempDir, `code_${timestamp}.php`);
         try { fs.writeFileSync(srcFile, code); } catch { return resolve(null); }
-        const runProc = exec(`php "${srcFile}"`, { timeout: 4000 }, (runErr, runStdout, runStderr) => {
+
+        const runProc = exec(`php "${srcFile}"`, { timeout: 5000 }, (runErr, runStdout, runStderr) => {
             try { fs.unlinkSync(srcFile); } catch {}
-            if (runErr && !runStdout && !runStderr) return resolve(null);
+            if (runErr) {
+                const msg = (runErr.message || '').toLowerCase();
+                if (runErr.code === 127 || msg.includes('not found') || msg.includes('not recognized')) {
+                    return resolve(null);
+                }
+            }
             const elapsed = Math.max(Date.now() - startTime, 1);
             resolve({
                 stdout: runStdout,
                 stderr: runStderr || (runErr ? runErr.message : ''),
                 code: runErr ? 1 : 0,
                 output: runStdout || runStderr || '(No output produced)',
-                compiler: 'PHP Native',
+                compiler: 'PHP (Docker Runner)',
                 executionTime: elapsed,
             });
         });
@@ -515,16 +587,22 @@ function executeLocalRuby(code, stdin = '') {
         const timestamp = Date.now() + Math.random().toString(36).substr(2, 4);
         const srcFile = path.join(tempDir, `code_${timestamp}.rb`);
         try { fs.writeFileSync(srcFile, code); } catch { return resolve(null); }
-        const runProc = exec(`ruby "${srcFile}"`, { timeout: 4000 }, (runErr, runStdout, runStderr) => {
+
+        const runProc = exec(`ruby "${srcFile}"`, { timeout: 5000 }, (runErr, runStdout, runStderr) => {
             try { fs.unlinkSync(srcFile); } catch {}
-            if (runErr && !runStdout && !runStderr) return resolve(null);
+            if (runErr) {
+                const msg = (runErr.message || '').toLowerCase();
+                if (runErr.code === 127 || msg.includes('not found') || msg.includes('not recognized')) {
+                    return resolve(null);
+                }
+            }
             const elapsed = Math.max(Date.now() - startTime, 1);
             resolve({
                 stdout: runStdout,
                 stderr: runStderr || (runErr ? runErr.message : ''),
                 code: runErr ? 1 : 0,
                 output: runStdout || runStderr || '(No output produced)',
-                compiler: 'Ruby Native',
+                compiler: 'Ruby (Docker Runner)',
                 executionTime: elapsed,
             });
         });

@@ -82,9 +82,6 @@ const Editor = ({
         }
 
         const ytext = ydocRef.current.getText('file_' + activeFileId);
-        if (ytext.length === 0 && language && language.starter) {
-            ytext.insert(0, language.starter);
-        }
 
         const binding = new CodemirrorBinding(
             ytext,
@@ -132,9 +129,6 @@ const Editor = ({
 
         const initialFileId = activeFileId || 'f_index';
         const ytext = ydoc.getText('file_' + initialFileId);
-        if (ytext.length === 0 && language && language.starter) {
-            ytext.insert(0, language.starter);
-        }
 
         const binding = new CodemirrorBinding(
             ytext,
