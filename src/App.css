@@ -848,79 +848,236 @@ footer a {
     border-radius: 50%;
 }
 
-/* Health Card */
+/* Modern Session Sync Status Card */
 .ideHealthCard {
-    background: #111420;
-    border: 1px solid var(--border-subtle);
-    border-radius: 10px;
-    padding: 12px;
+    background: linear-gradient(180deg, rgba(21, 26, 42, 0.75) 0%, rgba(14, 17, 28, 0.85) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 14px 14px 12px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    font-size: 11px;
+    gap: 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    transition: all 0.2s ease;
 }
 
 .cardHeader {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
 }
 
-.healthDot {
+.cardHeaderLeft {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.healthStatusDot {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: var(--primary-accent);
-    box-shadow: 0 0 6px var(--primary-accent);
+    display: inline-block;
 }
 
-.cardLabel {
-    font-size: 9px;
+.healthStatusDot.live {
+    background: var(--primary-accent);
+    box-shadow: 0 0 8px var(--primary-accent);
+    animation: liveDotPulse 2s infinite ease-in-out;
+}
+
+.healthStatusDot.reconnecting {
+    background: var(--status-warning);
+    box-shadow: 0 0 8px var(--status-warning);
+    animation: liveDotPulse 1s infinite ease-in-out;
+}
+
+@keyframes liveDotPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.cardTitle {
+    font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.08em;
-    color: var(--text-subtle);
-    display: block;
-}
-
-.cardHeader strong {
-    font-size: 12px;
-    color: var(--text-main);
-}
-
-.latencyMetricRow {
-    display: flex;
-    justify-content: space-between;
     color: var(--text-muted);
+    text-transform: uppercase;
 }
 
-.latencyMetricRow strong {
-    color: var(--text-main);
+.syncStatusBadge {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    line-height: 1.2;
+}
+
+.syncStatusBadge.connected {
+    background: rgba(74, 237, 136, 0.12);
+    color: var(--primary-accent);
+    border: 1px solid rgba(74, 237, 136, 0.28);
+}
+
+.syncStatusBadge.reconnecting {
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--status-warning);
+    border: 1px solid rgba(245, 158, 11, 0.28);
+}
+
+.syncLatencyRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 0;
+}
+
+.latencyLabelGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.latencyMetricTitle {
+    font-size: 13px;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+.latencySubtitle {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-subtle);
+}
+
+.latencyValueBox {
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+}
+
+.latencyNumber {
+    font-size: 20px;
+    font-weight: 800;
+    font-family: var(--font-code);
+    color: var(--primary-accent);
+    line-height: 1;
+}
+
+.latencyUnit {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-family: var(--font-code);
 }
 
 .latencyBar {
     height: 4px;
-    background: #24293c;
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
     overflow: hidden;
+    margin-top: 1px;
 }
 
 .latencyBarFill {
     height: 100%;
-    border-radius: 4px;
-    transition: width 0.3s ease;
+    border-radius: 999px;
+    transition: width 0.4s ease, background 0.4s ease;
 }
 
-.latencyBarFill.excellent { width: 100%; background: var(--status-success); }
-.latencyBarFill.good { width: 75%; background: #84cc16; }
-.latencyBarFill.fair { width: 50%; background: var(--status-warning); }
-.latencyBarFill.slow { width: 25%; background: var(--status-error); }
+.latencyBarFill.optimal {
+    width: 100%;
+    background: linear-gradient(90deg, #10b981, #4aed88);
+    box-shadow: 0 0 8px rgba(74, 237, 136, 0.45);
+}
+
+.latencyBarFill.good {
+    width: 78%;
+    background: linear-gradient(90deg, #22c55e, #84cc16);
+}
+
+.latencyBarFill.normal {
+    width: 55%;
+    background: linear-gradient(90deg, #eab308, #f59e0b);
+}
+
+.latencyBarFill.fair {
+    width: 32%;
+    background: linear-gradient(90deg, #f97316, #ef4444);
+}
+
+.latencyBarFill.measuring {
+    width: 50%;
+    background: #64748b;
+    animation: latencyPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes latencyPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
 
 .healthFooter {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    color: var(--text-subtle);
-    font-size: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footerSyncStatus {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-muted);
+    font-size: 10.5px;
     font-weight: 600;
+}
+
+.footerSyncStatus svg {
+    color: var(--primary-accent);
+    flex-shrink: 0;
+}
+
+.footerQualityPill {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 4px;
+    line-height: 1.3;
+}
+
+.footerQualityPill.optimal {
+    color: #4aed88;
+    background: rgba(74, 237, 136, 0.1);
+    border: 1px solid rgba(74, 237, 136, 0.25);
+}
+
+.footerQualityPill.good {
+    color: #a3e635;
+    background: rgba(163, 230, 53, 0.1);
+    border: 1px solid rgba(163, 230, 53, 0.25);
+}
+
+.footerQualityPill.normal {
+    color: #facc15;
+    background: rgba(250, 204, 21, 0.1);
+    border: 1px solid rgba(250, 204, 21, 0.25);
+}
+
+.footerQualityPill.fair {
+    color: #fb923c;
+    background: rgba(251, 146, 60, 0.1);
+    border: 1px solid rgba(251, 146, 60, 0.25);
+}
+
+.footerQualityPill.measuring {
+    color: #94a3b8;
+    background: rgba(148, 163, 184, 0.1);
+    border: 1px solid rgba(148, 163, 184, 0.2);
 }
 
 

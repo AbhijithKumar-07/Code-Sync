@@ -13,6 +13,7 @@ export const initSocket = async () => {
         reconnectionAttempts: Infinity,
         timeout: 10000,
         transports: ['websocket'],
+        upgrade: false,
     };
     return io(SOCKET_URL, options);
 };

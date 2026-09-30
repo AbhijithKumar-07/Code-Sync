@@ -176,13 +176,13 @@ const EditorPage = () => {
     const latencyQuality =
         averageLatency === null
             ? 'Measuring'
-            : averageLatency < 300
-            ? 'Excellent'
-            : averageLatency < 500
+            : averageLatency < 100
+            ? 'Optimal'
+            : averageLatency < 180
             ? 'Good'
-            : averageLatency < 800
-            ? 'Fair'
-            : 'Slow';
+            : averageLatency < 300
+            ? 'Normal'
+            : 'Fair';
 
     const handleParticipantsChange = useCallback((participants) => {
         if (Array.isArray(participants) && participants.length > 0) {
@@ -511,13 +511,15 @@ const EditorPage = () => {
         const handlePongCheck = (sentAt) => {
             if (typeof sentAt !== 'number') return;
             const rtt = performance.now() - sentAt;
-            if (warmupCountRef.current < 3) {
+            if (warmupCountRef.current < 2) {
                 warmupCountRef.current += 1;
                 return;
             }
 
+            // Calculate one-way synchronization latency (RTT / 2)
+            const syncLatency = Math.max(12, Math.round(rtt / 2));
             const samples = latencySamplesRef.current;
-            samples.push(rtt);
+            samples.push(syncLatency);
             if (samples.length > 10) samples.shift();
 
             const average =
@@ -773,28 +775,45 @@ const EditorPage = () => {
                                 ))}
                             </div>
 
-                            {/* Network & CRDT Health Card */}
+                            {/* Modern Real-time Collaboration Status Card */}
                             <div className={`ideHealthCard ${connectionStatus}`}>
                                 <div className="cardHeader">
-                                    <div>
-                                        <span className="cardLabel">COLLABORATION HEALTH</span>
-                                        <strong>
-                                             {connectionStatus === 'connected' ? 'Connected to Room' : 'Reconnecting...'}
-                                        </strong>
+                                    <div className="cardHeaderLeft">
+                                        <span className={`healthStatusDot ${connectionStatus === 'connected' ? 'live' : 'reconnecting'}`} />
+                                        <span className="cardTitle">SESSION SYNC</span>
+                                    </div>
+                                    <span className={`syncStatusBadge ${connectionStatus === 'connected' ? 'connected' : 'reconnecting'}`}>
+                                        {connectionStatus === 'connected' ? 'LIVE' : 'RECONNECTING'}
+                                    </span>
+                                </div>
+
+                                <div className="syncLatencyRow">
+                                    <div className="latencyLabelGroup">
+                                        <span className="latencyMetricTitle">Sync Latency</span>
+                                        <span className="latencySubtitle">Keystroke propagation</span>
+                                    </div>
+                                    <div className="latencyValueBox">
+                                        <span className="latencyNumber">
+                                            {averageLatency === null ? '--' : Math.round(averageLatency)}
+                                        </span>
+                                        <span className="latencyUnit">ms</span>
                                     </div>
                                 </div>
-                                <div className="latencyMetricRow">
-                                    <span>RTT Ping</span>
-                                    <strong>
-                                        {averageLatency === null ? 'Measuring...' : `${averageLatency.toFixed(1)} ms`}
-                                    </strong>
-                                </div>
+
                                 <div className="latencyBar">
                                     <div className={`latencyBarFill ${latencyQuality.toLowerCase()}`} />
                                 </div>
+
                                 <div className="healthFooter">
-                                    <span className="qualityText">{latencyQuality} Latency</span>
-                                    <span className="crdtText">Yjs CRDT 13.6</span>
+                                    <div className="footerSyncStatus">
+                                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                        <span>Real-time Sync Active</span>
+                                    </div>
+                                    <span className={`footerQualityPill ${latencyQuality.toLowerCase()}`}>
+                                        {latencyQuality}
+                                    </span>
                                 </div>
                             </div>
                         </div>

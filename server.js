@@ -12,6 +12,9 @@ const io = new Server(server, {
         origin: '*',
         methods: ['GET', 'POST'],
     },
+    transports: ['websocket'],
+    perMessageDeflate: false,
+    httpCompression: false,
 });
 const ysocketio = new YSocketIO(io);
 
