@@ -659,6 +659,8 @@ const EditorPage = () => {
             onConfirm: () => {
                 sessionStorage.removeItem(`codesync_user_${roomId}`);
                 sessionStorage.removeItem('codesync_sidebar_view');
+                sessionStorage.removeItem('codesync_draft_room_id');
+                sessionStorage.removeItem('codesync_draft_username');
                 if (socketRef.current) {
                     socketRef.current.disconnect();
                 }
@@ -781,7 +783,7 @@ const EditorPage = () => {
                                     <span className="stripMetricVal">
                                         {networkLatency === null ? '--' : Math.round(networkLatency)} ms
                                     </span>
-                                    <span className="stripMetricLabel">Response</span>
+                                    <span className="stripMetricLabel">Response Time</span>
                                 </div>
                                 <div className={`stripQualityTag ${speedCategory.toLowerCase().replace(/[^a-z]/g, '')}`}>
                                     <span className="stripTagDot" />

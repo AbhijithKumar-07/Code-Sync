@@ -6,16 +6,13 @@ import { useNavigate } from 'react-router-dom';
 const Home = () => {
     const navigate = useNavigate();
 
-    const [roomId, setRoomId] = useState(() => {
-        return sessionStorage.getItem('codesync_draft_room_id') || '';
-    });
+    const [roomId, setRoomId] = useState('');
     const [username, setUsername] = useState('');
 
     const [showRoomId, setShowRoomId] = useState(false);
 
     const handleRoomIdChange = (val) => {
         setRoomId(val);
-        sessionStorage.setItem('codesync_draft_room_id', val);
     };
 
     const handleUsernameChange = (val) => {
