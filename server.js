@@ -907,6 +907,18 @@ io.on('connection', (socket) => {
 
 
 
+// Serve static production build
+app.use(express.static(path.join(__dirname, 'build')));
+
+app.get('*', (req, res) => {
+    const indexPath = path.join(__dirname, 'build', 'index.html');
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.status(200).send('Code-Sync Server Running');
+    }
+});
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
 
