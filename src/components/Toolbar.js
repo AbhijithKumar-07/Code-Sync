@@ -154,9 +154,11 @@ const Toolbar = ({
                             type="button"
                             className={`customDropdownTrigger ${openDropdown === 'lang' ? 'open' : ''}`}
                             onClick={() => setOpenDropdown(openDropdown === 'lang' ? null : 'lang')}
+                            disabled={!activeFileId}
+                            title={!activeFileId ? 'No file open' : 'Select language'}
                         >
-                            <span className="triggerIcon">{selectedLanguage.icon}</span>
-                            <span className="triggerLabel">{selectedLanguage.name}</span>
+                            <span className="triggerIcon">{selectedLanguage?.icon || '📝'}</span>
+                            <span className="triggerLabel">{selectedLanguage?.name || 'Language'}</span>
                             <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" className="chevronIcon">
                                 <polyline points="6 9 12 15 18 9" />
                             </svg>
