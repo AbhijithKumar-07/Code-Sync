@@ -403,19 +403,6 @@ const EditorPage = () => {
             parentId,
         };
 
-        // Populate starter template for the newly created file's language
-        const fileLang = getLanguageByFilename(name);
-        if (fileLang && fileLang.starter && ydocRef.current) {
-            try {
-                const ytext = ydocRef.current.getText('file_' + newFileId);
-                if (ytext && ytext.length === 0) {
-                    ytext.insert(0, fileLang.starter);
-                }
-            } catch (e) {
-                console.warn('Could not populate initial starter in Yjs doc:', e);
-            }
-        }
-
         setFiles((prev) => [...prev, newFile]);
         setOpenFileIds((prev) => (prev.includes(newFile.id) ? prev : [...prev, newFile.id]));
         setActiveFileId(newFile.id);
@@ -447,15 +434,6 @@ const EditorPage = () => {
                                 ...prevLang,
                                 [itemId]: newLang,
                             }));
-                            // If the file text is currently empty, inject new language starter
-                            if (ydocRef.current && newLang.starter) {
-                                try {
-                                    const ytext = ydocRef.current.getText('file_' + itemId);
-                                    if (ytext && ytext.length === 0) {
-                                        ytext.insert(0, newLang.starter);
-                                    }
-                                } catch {}
-                            }
                         }
                     }
                     return { ...f, name: trimmed };

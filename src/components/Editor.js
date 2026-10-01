@@ -92,6 +92,12 @@ const Editor = ({
         }
 
         const ytext = ydocRef.current.getText('file_' + activeFileId);
+        const cached = sessionStorage.getItem(`codesync_content_${roomId}_${activeFileId}`);
+        if (cached && ytext.length === 0) {
+            try {
+                ytext.insert(0, cached);
+            } catch {}
+        }
 
         const binding = new CodemirrorBinding(
             ytext,
@@ -103,7 +109,7 @@ const Editor = ({
         if (onEditorReady) {
             onEditorReady(editorRef.current, ytext, ydocRef.current);
         }
-    }, [activeFileId, language, onEditorReady]);
+    }, [activeFileId, language, roomId, onEditorReady]);
 
     useEffect(() => {
         const ydoc = new Y.Doc();
@@ -139,6 +145,12 @@ const Editor = ({
 
         if (activeFileId) {
             const ytext = ydoc.getText('file_' + activeFileId);
+            const cached = sessionStorage.getItem(`codesync_content_${roomId}_${activeFileId}`);
+            if (cached && ytext.length === 0) {
+                try {
+                    ytext.insert(0, cached);
+                } catch {}
+            }
             const binding = new CodemirrorBinding(
                 ytext,
                 editorRef.current,
@@ -198,6 +210,12 @@ const Editor = ({
         };
 
         const handleEditorChanges = (instance, changes) => {
+            if (activeFileId && instance) {
+                try {
+                    sessionStorage.setItem(`codesync_content_${roomId}_${activeFileId}`, instance.getValue());
+                } catch {}
+            }
+
             const isLocalChange = changes.some(
                 (change) => change.origin !== 'y-codemirror'
             );
