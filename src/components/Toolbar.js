@@ -198,6 +198,8 @@ const Toolbar = ({
                             type="button"
                             className={`customDropdownTrigger ${openDropdown === 'theme' ? 'open' : ''}`}
                             onClick={() => setOpenDropdown(openDropdown === 'theme' ? null : 'theme')}
+                            disabled={!activeFileId}
+                            title={!activeFileId ? 'No file open' : 'Select theme'}
                         >
                             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" className="triggerIcon">
                                 <circle cx="12" cy="12" r="5" />
@@ -251,6 +253,8 @@ const Toolbar = ({
                             type="button"
                             className={`customDropdownTrigger ${openDropdown === 'font' ? 'open' : ''}`}
                             onClick={() => setOpenDropdown(openDropdown === 'font' ? null : 'font')}
+                            disabled={!activeFileId}
+                            title={!activeFileId ? 'No file open' : 'Select font size'}
                         >
                             <span className="fontGlyph">Aa</span>
                             <span className="triggerLabel">{fontSize}</span>
