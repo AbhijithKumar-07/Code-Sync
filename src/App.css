@@ -1847,6 +1847,9 @@ body {
 }
 
 .actionBtn.runBtn:active:not(:disabled) {
+    background: #047857;
+}
+
 .actionBtn:disabled,
 .actionBtn.runBtn:disabled,
 .customDropdownTrigger:disabled {
