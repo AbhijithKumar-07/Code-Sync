@@ -1969,32 +1969,7 @@ body {
     color: #64748b;
     max-width: 320px;
     line-height: 1.5;
-    margin: 0 0 18px 0;
-}
-
-.emptyEditorNewFileBtn {
-    background: #10b981;
-    color: #022c22;
-    border: none;
-    font-size: 12.5px;
-    font-weight: 700;
-    padding: 7px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.18s ease;
-}
-
-.emptyEditorNewFileBtn:hover {
-    background: #34d399;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
-}
-
-.emptyEditorNewFileBtn:active {
-    transform: translateY(0);
+    margin: 0;
 }
 
 .shortcutPill {
