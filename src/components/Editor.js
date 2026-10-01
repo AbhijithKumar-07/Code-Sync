@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Codemirror from 'codemirror';
 import * as Y from 'yjs';
 import { SocketIOProvider } from 'y-socket.io';
@@ -54,8 +54,6 @@ const Editor = ({
     const ydocRef = useRef(null);
     const bindingRef = useRef(null);
 
-    const [isSynced, setIsSynced] = useState(false);
-
     // Dynamic mode/theme updates without recreating Yjs binding
     useEffect(() => {
         if (editorRef.current && language) {
@@ -93,6 +91,11 @@ const Editor = ({
             return;
         }
 
+        const cached = sessionStorage.getItem(`codesync_content_${roomId}_${activeFileId}`);
+        if (cached) {
+            editorRef.current.setValue(cached);
+        }
+
         const ytext = ydocRef.current.getText('file_' + activeFileId);
         const binding = new CodemirrorBinding(
             ytext,
@@ -104,7 +107,7 @@ const Editor = ({
         if (onEditorReady) {
             onEditorReady(editorRef.current, ytext, ydocRef.current);
         }
-    }, [activeFileId, language, onEditorReady]);
+    }, [activeFileId, language, roomId, onEditorReady]);
 
     useEffect(() => {
         const ydoc = new Y.Doc();
@@ -118,6 +121,8 @@ const Editor = ({
             { transports: ['websocket'] }
         );
         providerRef.current = provider;
+
+        const cachedInitial = activeFileId ? sessionStorage.getItem(`codesync_content_${roomId}_${activeFileId}`) || '' : '';
 
         editorRef.current = Codemirror.fromTextArea(
             document.getElementById('realtimeEditor'),
@@ -138,7 +143,17 @@ const Editor = ({
             }
         );
 
-        if (activeFileId) {
+        if (cachedInitial) {
+            editorRef.current.setValue(cachedInitial);
+        }
+
+        const attachBinding = () => {
+            if (!ydocRef.current || !editorRef.current || !providerRef.current || !activeFileId) return;
+            if (bindingRef.current) {
+                bindingRef.current.destroy();
+                bindingRef.current = null;
+            }
+
             const ytext = ydoc.getText('file_' + activeFileId);
             const binding = new CodemirrorBinding(
                 ytext,
@@ -150,20 +165,24 @@ const Editor = ({
             if (onEditorReady) {
                 onEditorReady(editorRef.current, ytext, ydoc);
             }
+        };
+
+        if (activeFileId) {
+            if (provider.synced) {
+                attachBinding();
+            } else {
+                provider.once('sync', (isSynced) => {
+                    if (isSynced) attachBinding();
+                });
+                // Fallback attach in case sync event was already fired
+                setTimeout(attachBinding, 400);
+            }
         } else {
             editorRef.current.setValue('');
             if (onEditorReady) {
                 onEditorReady(editorRef.current, null, ydoc);
             }
         }
-
-        const handleSync = (synced) => {
-            if (synced) {
-                setIsSynced(true);
-            }
-        };
-        provider.on('sync', handleSync);
-        const syncFallbackTimer = setTimeout(() => setIsSynced(true), 400);
 
         provider.awareness.setLocalStateField('user', {
             name: username,
@@ -232,7 +251,6 @@ const Editor = ({
 
         return () => {
             clearTimeout(typingTimeout);
-            clearTimeout(syncFallbackTimer);
             if (bindingRef.current) {
                 bindingRef.current.destroy();
                 bindingRef.current = null;
@@ -244,7 +262,6 @@ const Editor = ({
             }
             provider.awareness.off('change', updateParticipants);
             provider.off('status', handleStatus);
-            provider.off('sync', handleSync);
             provider.destroy();
             ydoc.destroy();
         };
@@ -259,7 +276,7 @@ const Editor = ({
 
     return (
         <div className="editorInnerWrapper" style={{ fontSize: fontSize || '16px' }}>
-            <div className={`editorCodeAreaWrapper ${activeFileId ? (isSynced ? 'active' : 'editorSyncing') : 'hidden'}`}>
+            <div className={`editorCodeAreaWrapper ${activeFileId ? 'active' : 'hidden'}`}>
                 <textarea id="realtimeEditor"></textarea>
             </div>
             {!activeFileId && (
