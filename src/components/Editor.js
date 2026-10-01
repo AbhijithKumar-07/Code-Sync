@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Codemirror from 'codemirror';
 import * as Y from 'yjs';
 import { SocketIOProvider } from 'y-socket.io';
@@ -54,6 +54,8 @@ const Editor = ({
     const ydocRef = useRef(null);
     const bindingRef = useRef(null);
 
+    const [isSynced, setIsSynced] = useState(false);
+
     // Dynamic mode/theme updates without recreating Yjs binding
     useEffect(() => {
         if (editorRef.current && language) {
@@ -92,13 +94,6 @@ const Editor = ({
         }
 
         const ytext = ydocRef.current.getText('file_' + activeFileId);
-        const cached = sessionStorage.getItem(`codesync_content_${roomId}_${activeFileId}`);
-        if (cached && ytext.length === 0) {
-            try {
-                ytext.insert(0, cached);
-            } catch {}
-        }
-
         const binding = new CodemirrorBinding(
             ytext,
             editorRef.current,
@@ -109,7 +104,7 @@ const Editor = ({
         if (onEditorReady) {
             onEditorReady(editorRef.current, ytext, ydocRef.current);
         }
-    }, [activeFileId, language, roomId, onEditorReady]);
+    }, [activeFileId, language, onEditorReady]);
 
     useEffect(() => {
         const ydoc = new Y.Doc();
@@ -145,12 +140,6 @@ const Editor = ({
 
         if (activeFileId) {
             const ytext = ydoc.getText('file_' + activeFileId);
-            const cached = sessionStorage.getItem(`codesync_content_${roomId}_${activeFileId}`);
-            if (cached && ytext.length === 0) {
-                try {
-                    ytext.insert(0, cached);
-                } catch {}
-            }
             const binding = new CodemirrorBinding(
                 ytext,
                 editorRef.current,
@@ -167,6 +156,14 @@ const Editor = ({
                 onEditorReady(editorRef.current, null, ydoc);
             }
         }
+
+        const handleSync = (synced) => {
+            if (synced) {
+                setIsSynced(true);
+            }
+        };
+        provider.on('sync', handleSync);
+        const syncFallbackTimer = setTimeout(() => setIsSynced(true), 400);
 
         provider.awareness.setLocalStateField('user', {
             name: username,
@@ -235,6 +232,7 @@ const Editor = ({
 
         return () => {
             clearTimeout(typingTimeout);
+            clearTimeout(syncFallbackTimer);
             if (bindingRef.current) {
                 bindingRef.current.destroy();
                 bindingRef.current = null;
@@ -246,6 +244,7 @@ const Editor = ({
             }
             provider.awareness.off('change', updateParticipants);
             provider.off('status', handleStatus);
+            provider.off('sync', handleSync);
             provider.destroy();
             ydoc.destroy();
         };
@@ -260,7 +259,7 @@ const Editor = ({
 
     return (
         <div className="editorInnerWrapper" style={{ fontSize: fontSize || '16px' }}>
-            <div className={`editorCodeAreaWrapper ${activeFileId ? 'active' : 'hidden'}`}>
+            <div className={`editorCodeAreaWrapper ${activeFileId ? (isSynced ? 'active' : 'editorSyncing') : 'hidden'}`}>
                 <textarea id="realtimeEditor"></textarea>
             </div>
             {!activeFileId && (
