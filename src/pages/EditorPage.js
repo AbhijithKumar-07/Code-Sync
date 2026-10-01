@@ -956,6 +956,7 @@ const EditorPage = () => {
                         compiler={compilerName}
                         stdin={stdin}
                         onStdinChange={setStdin}
+                        username={username}
                         onClear={() => {
                             setExecutionOutput(null);
                             setExecutionStatus(null);

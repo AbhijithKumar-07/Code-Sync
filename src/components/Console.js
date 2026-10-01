@@ -9,11 +9,16 @@ const Console = ({
     executionTime,
     compiler,
     onClear,
+    username,
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [copied, setCopied] = useState(false);
 
     if (!isOpen) return null;
+
+    const displayUser = username
+        ? username.toLowerCase().replace(/\s+/g, '_')
+        : 'user';
 
     const handleCopyOutput = () => {
         const text = output?.stdout || output?.stderr || output?.output || '';
@@ -138,7 +143,7 @@ const Console = ({
                     ) : output ? (
                         <div className="terminalOutputText">
                             <div className="terminalPromptLine">
-                                <span className="promptUser">guest@codesync</span>
+                                <span className="promptUser">{displayUser}@codesync</span>
                                 <span className="promptColon">:</span>
                                 <span className="promptPath">~/workspace</span>
                                 <span className="promptDollar">$</span>
