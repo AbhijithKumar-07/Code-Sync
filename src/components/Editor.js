@@ -54,6 +54,8 @@ const Editor = ({
     const ydocRef = useRef(null);
     const bindingRef = useRef(null);
 
+    const isMountedRef = useRef(false);
+
     // Dynamic mode/theme updates without recreating Yjs binding
     useEffect(() => {
         if (editorRef.current && language) {
@@ -75,6 +77,11 @@ const Editor = ({
 
     // Handle dynamic file switching
     useEffect(() => {
+        if (!isMountedRef.current) {
+            isMountedRef.current = true;
+            return;
+        }
+
         if (!ydocRef.current || !editorRef.current || !providerRef.current) return;
 
         // Destroy previous file binding
